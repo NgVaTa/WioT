@@ -1,0 +1,43 @@
+import numpy as np
+import pandas as pd
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.preprocessing import StandardScaler
+from skl2onnx import convert_sklearn
+from skl2onnx.common.data_types import FloatTensorType
+
+# 1. Tạo tập dữ liệu giả lập đầm tôm nước lợ (1.000 mẫu)
+np.random.seed(42)
+n_samples = 1000
+
+ph = np.random.uniform(7.0, 9.0, n_samples)
+temp = np.random.uniform(24.0, 33.0, n_samples)
+orp = np.random.uniform(100, 400, n_samples)
+ec = np.random.uniform(10.0, 25.0, n_samples)
+
+# Công thức vật lý & sinh học giả lập DO thực tế
+do_target = 8.0 - (temp * 0.1) - (ph * 0.2) + (orp * 0.004) + np.random.normal(0, 0.2, n_samples)
+do_target = np.clip(do_target, 1.0, 10.0)
+
+X = np.column_stack((ph, temp, orp, ec))
+y = do_target
+
+# 2. Chuẩn hóa dữ liệu (StandardScaler)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+print("Mean:", scaler.mean_)
+print("Std:", scaler.scale_)
+
+# 3. Huấn luyện mô hình Random Forest
+model = RandomForestRegressor(n_estimators=50, max_depth=8, random_state=42)
+model.fit(X_scaled, y)
+
+# 4. Chuyển đổi mô hình Scikit-Learn sang định dạng ONNX
+initial_type = [('float_input', FloatTensorType([None, 4]))]
+onnx_model = convert_sklearn(model, initial_types=initial_type)
+
+# 5. Lưu tệp do_predictor.onnx
+with open("do_predictor.onnx", "wb") as f:
+    f.write(onnx_model.SerializeToString())
+
+print("-> Đã xuất tệp do_predictor.onnx thành công!")
