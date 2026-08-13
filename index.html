@@ -139,7 +139,7 @@
         if (scannedDevice && scannedDevice.startsWith("AQS-")) {
             localStorage.setItem('WIOT_ACTIVE_DEVICE', scannedDevice);
         }
-        const DEVICE_ID = scannedDevice || localStorage.getItem('WIOT_ACTIVE_DEVICE') || "AQS-DEMO12345678";
+        const DEVICE_ID = scannedDevice || localStorage.getItem('WIOT_ACTIVE_DEVICE') || "WIOT0123456789";
 
         let activePond = "1";
         let isManualMode = false;
