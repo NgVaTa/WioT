@@ -50,6 +50,7 @@
                 <i class="fa-solid fa-fish text-sky-300"></i> CHỌN AO NUÔI:
             </label>
             <select id="pond-select" onchange="changeActivePond(this.value)" class="bg-slate-900 text-sky-300 font-black text-xs px-3 py-1.5 rounded-lg border border-sky-500 focus:outline-none cursor-pointer">
+                <!-- ĐÃ SỬA: Chọn mặc định là Ao 1 -->
                 <option value="1" selected>AO NUÔI 1</option>
                 <option value="2">AO NUÔI 2</option>
                 <option value="3">AO NUÔI 3</option>
@@ -66,7 +67,8 @@
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                 <div>
                     <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Đang theo dõi</span>
-                    <h2 id="dash-pond-title" class="text-lg font-black text-sky-700">AO NUÔI 3</h2>
+                    <!-- ĐÃ SỬA: Tiêu đề mặc định hiển thị lúc tải là Ao 1 -->
+                    <h2 id="dash-pond-title" class="text-lg font-black text-sky-700">AO NUÔI 1</h2>
                 </div>
                 <div class="text-right flex items-center gap-2">
                     <div>
@@ -155,7 +157,7 @@
                 <!-- THIẾT BỊ THEO AO -->
                 <div class="bg-white rounded-2xl p-4 shadow-sm space-y-4 border border-slate-200">
                     <h3 id="ctrl-section-title" class="font-black text-sky-700 text-xs uppercase tracking-wider border-b pb-2 flex items-center justify-between">
-                        <span>THIẾT BỊ DÀNH RIÊNG CHO AO NUÔI 3</span>
+                        <span>THIẾT BỊ DÀNH RIÊNG CHO AO NUÔI 1</span>
                         <i class="fa-solid fa-sliders"></i>
                     </h3>
 
@@ -163,7 +165,7 @@
                         <div class="flex items-center space-x-3">
                             <div class="p-2.5 bg-sky-100 text-sky-600 rounded-lg"><i class="fa-solid fa-faucet-drip"></i></div>
                             <div>
-                                <p id="label-relay-van" class="font-bold text-sm text-slate-800">Van Điện Ao 3 (Y2)</p>
+                                <p id="label-relay-van" class="font-bold text-sm text-slate-800">Van Điện Ao 1 (Y0)</p>
                                 <p class="text-[10px] text-slate-400">Van cấp nước vào ao nuôi</p>
                             </div>
                         </div>
@@ -177,7 +179,7 @@
                         <div class="flex items-center space-x-3">
                             <div class="p-2.5 bg-amber-100 text-amber-600 rounded-lg"><i class="fa-solid fa-fan"></i></div>
                             <div>
-                                <p id="label-relay-quat" class="font-bold text-sm text-slate-800">Dàn Quạt Nước Ao 3 (Y12)</p>
+                                <p id="label-relay-quat" class="font-bold text-sm text-slate-800">Dàn Quạt Nước Ao 1 (Y10)</p>
                                 <p class="text-[10px] text-slate-400">Sục khí & lưu thông dòng nước</p>
                             </div>
                         </div>
@@ -191,7 +193,7 @@
                         <div class="flex items-center space-x-3">
                             <div class="p-2.5 bg-purple-100 text-purple-600 rounded-lg"><i class="fa-solid fa-dumpster"></i></div>
                             <div>
-                                <p id="label-relay-xaday" class="font-bold text-sm text-slate-800">Bơm Xả Đáy Ao 3 (Y16)</p>
+                                <p id="label-relay-xaday" class="font-bold text-sm text-slate-800">Bơm Xả Đáy Ao 1 (Y14)</p>
                                 <p class="text-[10px] text-slate-400">Hút xi-phông phân tôm & chất thải</p>
                             </div>
                         </div>
@@ -251,7 +253,8 @@
                 <div class="border-b pb-3">
                     <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">VERIFIED DIGITAL PASSPORT</span>
                     <h2 class="text-lg font-black text-slate-800 mt-2">HỘ CHIẾU SỐ THỦY SẢN</h2>
-                    <p class="text-xs text-slate-500">Đầm tôm Cà Mau - <span id="passport-pond-name" class="font-black text-sky-700">AO NUÔI 3</span></p>
+                    <!-- ĐÃ SỬA: Tên mặc định hiển thị lúc tải là Ao 1 -->
+                    <p class="text-xs text-slate-500">Đầm tôm Cà Mau - <span id="passport-pond-name" class="font-black text-sky-700">AO NUÔI 1</span></p>
                 </div>
 
                 <div class="flex justify-center my-2">
@@ -295,7 +298,8 @@
         const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev";
         const DEVICE_ID = "AQS-88902A34";
 
-        let activePond = "3";
+        // ĐÃ SỬA: Chuyển biến khởi tạo sang "1" để đồng bộ với giao diện HTML
+        let activePond = "1";
         let isManualMode = false;
         let cachedTelemetryData = null;
 
@@ -444,7 +448,7 @@
             if (!cachedTelemetryData) return;
 
             const pondKey = `pond${activePond}`;
-            const pondData = cachedTelemetryData[pondKey] || cachedTelemetryData.pond3;
+            const pondData = cachedTelemetryData[pondKey] || cachedTelemetryData.pond1; // Sửa fallback thành pond1
 
             if (pondData) {
                 document.getElementById('val-ph').innerText = pondData.ph || "--.--";
@@ -480,7 +484,8 @@
 
         setInterval(fetchTelemetryData, 5000);
         window.onload = () => {
-            changeActivePond("3");
+            // ĐÃ SỬA: Hàm khởi tạo lúc tải trang tự động nạp "1"
+            changeActivePond("1");
             fetchTelemetryData();
         };
     </script>
