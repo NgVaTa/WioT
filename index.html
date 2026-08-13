@@ -3,335 +3,397 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WioT - Hệ Thống Điều Khiển Thông Minh</title>
-
-    <meta name="theme-color" content="#0f172a">
+    <title>WioT - HỆ THỐNG ĐIỀU KHIỂN THÔNG MINH</title>
+    
+    <!-- PWA Manifest & Theme -->
+    <meta name="theme-color" content="#0284c7">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-
+    
+    <!-- Tailwind CSS, FontAwesome & QRCode.js CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web/dist/ort.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
         body { -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        .tab-btn.active { color: #38bdf8; border-bottom: 3px solid #38bdf8; font-weight: 700; }
-        .glass-card { background: rgba(30, 41, 59, 0.7); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.08); }
+        .glass-card { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px); border: 1px solid rgba(226, 232, 240, 0.8); }
+        .tab-btn.active { color: #0284c7; border-bottom: 3px solid #0284c7; font-weight: 700; }
     </style>
 </head>
-<body class="bg-slate-900 text-slate-100 pb-24 select-none min-h-screen">
+<body class="bg-slate-100 text-slate-800 pb-24 select-none">
 
-    <!-- HEADER -->
-    <header class="bg-slate-800/90 border-b border-slate-700 p-4 sticky top-0 z-50 flex justify-between items-center backdrop-blur-md">
-        <div class="flex items-center space-x-3">
-            <div class="w-9 h-9 bg-sky-500/20 text-sky-400 rounded-xl flex items-center justify-center font-black text-xl border border-sky-500/30">
-                W
+    <!-- HEADER & POND SELECTOR -->
+    <header class="bg-sky-700 text-white p-4 sticky top-0 z-50 shadow-md">
+        <div class="flex justify-between items-center mb-3">
+            <div class="flex items-center space-x-2">
+                <i class="fa-solid fa-water text-2xl text-sky-300"></i>
+                <div>
+                    <h1 class="font-black text-lg leading-none tracking-wide">WioT</h1>
+                    <span class="text-[10px] text-sky-200">Hệ thống điều khiển thông minh</span>
+                </div>
             </div>
-            <div>
-                <h1 class="font-black text-lg tracking-wider text-white leading-none">Wi<span class="text-sky-400">o</span>T</h1>
-                <span class="text-[10px] text-slate-400 uppercase tracking-widest font-semibold">Hệ Thống Điều Khiển Thông Minh</span>
-            </div>
-        </div>
-        <div class="flex items-center space-x-2">
-            <span id="auto-badge" class="bg-emerald-500/20 text-emerald-400 text-[10px] font-bold px-2.5 py-1 rounded-full border border-emerald-500/30 flex items-center gap-1.5">
-                <span class="w-2 h-2 bg-emerald-400 rounded-full animate-ping"></span> AUTO MODE
+            <span id="connection-status" class="bg-emerald-500 text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 font-bold">
+                <span class="w-2 h-2 bg-white rounded-full animate-ping"></span> ONLINE
             </span>
+        </div>
+
+        <!-- BỘ CHỌN AO NUÔI TRUNG TÂM -->
+        <div class="bg-sky-800/80 p-1.5 rounded-xl border border-sky-600/50 flex items-center justify-between">
+            <label for="pond-select" class="text-xs font-bold text-sky-100 pl-2 flex items-center gap-1.5">
+                <i class="fa-solid fa-fish text-sky-300"></i> BẬT AO NUÔI:
+            </label>
+            <select id="pond-select" onchange="changeActivePond(this.value)" class="bg-slate-900 text-sky-300 font-black text-xs px-3 py-1.5 rounded-lg border border-sky-500 focus:outline-none cursor-pointer">
+                <option value="1"selected>AO NUÔI 1</option>
+                <option value="2">AO NUÔI 2</option>
+                <option value="3">AO NUÔI 3</option>
+                <option value="4">AO NUÔI 4</option>
+            </select>
         </div>
     </header>
 
     <!-- MAIN CONTAINER -->
-    <main class="max-w-xl mx-auto p-4 space-y-5">
+    <main class="max-w-md mx-auto p-4 space-y-4">
 
-        <!-- TAB 1: GIÁM SÁT REALTIME (MAIN SCREEN) -->
+        <!-- TAB 1: DASHBOARD GIÁM SÁT REALTIME -->
         <section id="tab-dashboard" class="tab-content space-y-4">
             
-            <!-- System Cycle Status -->
-            <div class="glass-card p-4 rounded-2xl flex justify-between items-center">
+            <!-- Summary Header với "ĐO VÀO LÚC" -->
+            <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                 <div>
-                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Trạng Thái Chu Trình Tự Động</span>
-                    <p class="text-sm font-bold text-sky-400 mt-0.5">
-                        Đang đo: <span id="current-pond-id" class="text-white">AO NUÔI 1</span> 
-                        (<span id="cycle-step-name" class="text-emerald-400">Bước 0: Bơm Cấp Nước</span>)
-                    </p>
+                    <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Đang theo dõi</span>
+                    <h2 id="dash-pond-title" class="text-lg font-black text-sky-700">AO NUÔI 3</h2>
                 </div>
-                <div class="text-right">
-                    <span class="text-[10px] text-slate-400 font-bold uppercase block">Cập Nhật Sau</span>
-                    <span id="refresh-timer" class="text-xs font-mono font-bold text-amber-400">5s</span>
+                <div class="text-right flex items-center gap-3">
+                    <div>
+                        <span class="text-[10px] text-slate-400 font-bold uppercase block">Đo vào lúc</span>
+                        <p id="last-updated" class="text-xs font-mono font-bold text-emerald-600">07:51:33</p>
+                    </div>
+                    <button onclick="fetchTelemetryData()" class="p-2 bg-sky-50 hover:bg-sky-100 text-sky-600 rounded-xl text-xs font-bold transition" title="Làm mới dữ liệu">
+                        <i class="fa-solid fa-rotate-right"></i>
+                    </button>
                 </div>
             </div>
 
-            <!-- 4 Ao Nuôi Grid -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <!-- Telemetry Grid 2x2 Cân Đối (pH, EC, Temp, ORP) -->
+            <div class="grid grid-cols-2 gap-3">
                 
-                <!-- AO NUÔI 1 -->
-                <div class="glass-card p-4 rounded-2xl border-l-4 border-sky-500 relative">
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="font-black text-base text-white">AO NUÔI 1</h2>
-                        <div class="flex space-x-2 text-slate-400 text-xs">
-                            <i class="fa-solid fa-fan text-amber-400 animate-spin" title="Quạt nước Y10"></i>
-                            <i class="fa-solid fa-faucet-drip text-sky-400" title="Van điện Y0"></i>
-                        </div>
+                <!-- 1. pH Water -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-emerald-500">
+                    <div class="flex justify-between items-center text-slate-400 text-xs mb-1 font-medium">
+                        <span>Độ pH Nước</span>
+                        <i class="fa-solid fa-vial text-emerald-500"></i>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">pH Nước</span><b id="p1-ph" class="text-base text-emerald-400">8.15</b> <span class="text-[10px] text-slate-500">pH</span></div>
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">Độ mặn EC</span><b id="p1-ec" class="text-base text-amber-400">18.5</b> <span class="text-[10px] text-slate-500">ppt</span></div>
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">ORP Đáy</span><b id="p1-orp" class="text-base text-purple-400">+280</b> <span class="text-[10px] text-slate-500">mV</span></div>
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">Nhiệt độ</span><b id="p1-temp" class="text-base text-rose-400">28.5</b> <span class="text-[10px] text-slate-500">°C</span></div>
+                    <div class="flex items-baseline space-x-1">
+                        <span id="val-ph" class="text-3xl font-black text-slate-800">8.20</span>
                     </div>
+                    <span class="text-[10px] text-emerald-600 font-semibold bg-emerald-50 px-1.5 py-0.5 rounded mt-2 inline-block">Mức chuẩn (7.5 - 8.5)</span>
                 </div>
 
-                <!-- AO NUÔI 2 -->
-                <div class="glass-card p-4 rounded-2xl border-l-4 border-emerald-500">
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="font-black text-base text-white">AO NUÔI 2</h2>
-                        <div class="flex space-x-2 text-slate-400 text-xs">
-                            <i class="fa-solid fa-fan text-amber-400" title="Quạt nước Y11"></i>
-                            <i class="fa-solid fa-faucet-drip text-sky-400" title="Van điện Y1"></i>
-                        </div>
+                <!-- 2. EC (Độ mặn) -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-amber-500">
+                    <div class="flex justify-between items-center text-slate-400 text-xs mb-1 font-medium">
+                        <span>Độ mặn EC</span>
+                        <i class="fa-solid fa-water-latter text-amber-500"></i>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">pH Nước</span><b id="p2-ph" class="text-base text-emerald-400">8.05</b> <span class="text-[10px] text-slate-500">pH</span></div>
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">Độ mặn EC</span><b id="p2-ec" class="text-base text-amber-400">19.1</b> <span class="text-[10px] text-slate-500">ppt</span></div>
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">ORP Đáy</span><b id="p2-orp" class="text-base text-purple-400">+310</b> <span class="text-[10px] text-slate-500">mV</span></div>
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">Nhiệt độ</span><b id="p2-temp" class="text-base text-rose-400">29.0</b> <span class="text-[10px] text-slate-500">°C</span></div>
+                    <div class="flex items-baseline space-x-1">
+                        <span id="val-ec" class="text-3xl font-black text-slate-800">17.8</span>
+                        <span class="text-xs text-slate-500">ppt</span>
                     </div>
+                    <span class="text-[10px] text-amber-600 font-semibold bg-amber-50 px-1.5 py-0.5 rounded mt-2 inline-block">Ổn định</span>
                 </div>
 
-                <!-- AO NUÔI 3 -->
-                <div class="glass-card p-4 rounded-2xl border-l-4 border-purple-500">
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="font-black text-base text-white">AO NUÔI 3</h2>
-                        <div class="flex space-x-2 text-slate-400 text-xs">
-                            <i class="fa-solid fa-fan text-slate-600" title="Quạt nước Y12"></i>
-                            <i class="fa-solid fa-faucet-drip text-slate-600" title="Van điện Y2"></i>
-                        </div>
+                <!-- 3. Nhiệt Độ Nước Ao (ĐÃ ĐƯA LÊN SONG SONG VỚI ORP) -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-rose-500">
+                    <div class="flex justify-between items-center text-slate-400 text-xs mb-1 font-medium">
+                        <span>Nhiệt độ nước</span>
+                        <i class="fa-solid fa-temperature-half text-rose-500"></i>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">pH Nước</span><b id="p3-ph" class="text-base text-emerald-400">8.20</b> <span class="text-[10px] text-slate-500">pH</span></div>
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">Độ mặn EC</span><b id="p3-ec" class="text-base text-amber-400">17.8</b> <span class="text-[10px] text-slate-500">ppt</span></div>
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">ORP Đáy</span><b id="p3-orp" class="text-base text-purple-400">+250</b> <span class="text-[10px] text-slate-500">mV</span></div>
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">Nhiệt độ</span><b id="p3-temp" class="text-base text-rose-400">28.2</b> <span class="text-[10px] text-slate-500">°C</span></div>
+                    <div class="flex items-baseline space-x-1">
+                        <span id="val-temp" class="text-3xl font-black text-slate-800">28.2</span>
+                        <span class="text-xs text-slate-500 font-bold">°C</span>
                     </div>
+                    <span class="text-[10px] text-rose-600 font-semibold bg-rose-50 px-1.5 py-0.5 rounded mt-2 inline-block">Mức chuẩn (26 - 32°C)</span>
                 </div>
 
-                <!-- AO NUÔI 4 -->
-                <div class="glass-card p-4 rounded-2xl border-l-4 border-amber-500">
-                    <div class="flex justify-between items-center mb-3">
-                        <h2 class="font-black text-base text-white">AO NUÔI 4</h2>
-                        <div class="flex space-x-2 text-slate-400 text-xs">
-                            <i class="fa-solid fa-fan text-slate-600" title="Quạt nước Y13"></i>
-                            <i class="fa-solid fa-faucet-drip text-slate-600" title="Van điện Y3"></i>
-                        </div>
+                <!-- 4. ORP (Bùn Đáy Ao) -->
+                <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-purple-500">
+                    <div class="flex justify-between items-center text-slate-400 text-xs mb-1 font-medium">
+                        <span>Chỉ số ORP (Đáy)</span>
+                        <i class="fa-solid fa-bolt text-purple-500"></i>
                     </div>
-                    <div class="grid grid-cols-2 gap-2 text-xs">
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">pH Nước</span><b id="p4-ph" class="text-base text-emerald-400">7.95</b> <span class="text-[10px] text-slate-500">pH</span></div>
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">Độ mặn EC</span><b id="p4-ec" class="text-base text-amber-400">18.2</b> <span class="text-[10px] text-slate-500">ppt</span></div>
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">ORP Đáy</span><b id="p4-orp" class="text-base text-purple-400">+295</b> <span class="text-[10px] text-slate-500">mV</span></div>
-                        <div class="bg-slate-800/60 p-2 rounded-xl"><span class="text-slate-400 block text-[10px]">Nhiệt độ</span><b id="p4-temp" class="text-base text-rose-400">28.8</b> <span class="text-[10px] text-slate-500">°C</span></div>
+                    <div class="flex items-baseline space-x-1">
+                        <span id="val-orp" class="text-3xl font-black text-slate-800">250</span>
+                        <span class="text-xs text-slate-500 font-bold">mV</span>
                     </div>
+                    <span class="text-[10px] text-purple-600 font-semibold bg-purple-50 px-1.5 py-0.5 rounded mt-2 inline-block">Đáy hiếu khí sạch</span>
                 </div>
 
             </div>
         </section>
 
-        <!-- TAB 2: ĐIỀU KHIỂN MANUAL (Y0 - Y17) -->
+        <!-- TAB 2: ĐIỀU KHIỂN TỪ XA TỰ ĐỘNG ĐỒNG BỘ THEO AO -->
         <section id="tab-control" class="tab-content space-y-4 hidden">
-            
-            <!-- Điều Khiển Bơm & Van Trung Tâm (Y0 - Y7) -->
-            <div class="glass-card p-4 rounded-2xl space-y-3">
-                <h3 class="font-bold text-xs uppercase tracking-wider text-sky-400 flex items-center gap-2 border-b border-slate-700 pb-2">
-                    <i class="fa-solid fa-sliders"></i> Điều Khiển Trung Tâm (Bơm & Van)
+            <div class="bg-amber-50 border border-amber-200 text-amber-800 p-3 rounded-xl text-xs flex items-start gap-2">
+                <i class="fa-solid fa-clock text-amber-600 mt-0.5"></i>
+                <span>Lệnh gửi tới <strong id="ctrl-pond-banner">AO NUÔI 3</strong> sẽ được HMI Samkoon quét và kích hoạt Rơ-le trong <strong>5 giây</strong>.</span>
+            </div>
+
+            <div class="bg-white rounded-2xl p-4 shadow-sm space-y-4 border border-slate-200">
+                <h3 id="ctrl-section-title" class="font-black text-sky-700 text-xs uppercase tracking-wider border-b pb-2 flex items-center justify-between">
+                    <span>THIẾT BỊ DÀNH RIÊNG CHO AO NUÔI 3</span>
+                    <i class="fa-solid fa-sliders"></i>
                 </h3>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <button onclick="sendRelayCmd('Y4')" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold text-left flex justify-between items-center">
-                        <span>BƠM NƯỚC AO (Y4)</span> <span id="status-Y4" class="w-2.5 h-2.5 bg-slate-600 rounded-full"></span>
-                    </button>
-                    <button onclick="sendRelayCmd('Y5')" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold text-left flex justify-between items-center">
-                        <span>BƠM NƯỚC SẠCH (Y5)</span> <span id="status-Y5" class="w-2.5 h-2.5 bg-slate-600 rounded-full"></span>
-                    </button>
-                    <button onclick="sendRelayCmd('Y6')" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold text-left flex justify-between items-center">
-                        <span>BƠM KHỬ TRÙNG (Y6)</span> <span id="status-Y6" class="w-2.5 h-2.5 bg-slate-600 rounded-full"></span>
-                    </button>
-                    <button onclick="sendRelayCmd('Y7')" class="p-3 bg-slate-800 hover:bg-slate-700 border border-slate-700 rounded-xl font-bold text-left flex justify-between items-center">
-                        <span>VAN XẢ THẢI (Y7)</span> <span id="status-Y7" class="w-2.5 h-2.5 bg-slate-600 rounded-full"></span>
-                    </button>
+
+                <!-- Switch 1: Van Điện -->
+                <div class="flex justify-between items-center p-2 rounded-xl hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2.5 bg-sky-100 text-sky-600 rounded-lg"><i class="fa-solid fa-faucet-drip"></i></div>
+                        <div>
+                            <p id="label-relay-van" class="font-bold text-sm text-slate-800">Van Điện Ao 3 (Y2)</p>
+                            <p class="text-[10px] text-slate-400">Van cấp nước vào ao nuôi</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="chk-relay-van" onchange="triggerRelayCommand('van', this.checked)" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                </div>
+
+                <!-- Switch 2: Dàn Quạt Nước -->
+                <div class="flex justify-between items-center p-2 rounded-xl hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2.5 bg-amber-100 text-amber-600 rounded-lg"><i class="fa-solid fa-fan"></i></div>
+                        <div>
+                            <p id="label-relay-quat" class="font-bold text-sm text-slate-800">Dàn Quạt Nước Ao 3 (Y12)</p>
+                            <p class="text-[10px] text-slate-400">Sục khí & lưu thông dòng nước</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="chk-relay-quat" onchange="triggerRelayCommand('quat', this.checked)" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
+                </div>
+
+                <!-- Switch 3: Xả Đáy Ao -->
+                <div class="flex justify-between items-center p-2 rounded-xl hover:bg-slate-50">
+                    <div class="flex items-center space-x-3">
+                        <div class="p-2.5 bg-purple-100 text-purple-600 rounded-lg"><i class="fa-solid fa-dumpster"></i></div>
+                        <div>
+                            <p id="label-relay-xaday" class="font-bold text-sm text-slate-800">Bơm Xả Đáy Ao 3 (Y16)</p>
+                            <p class="text-[10px] text-slate-400">Hút xi-phông phân tôm & chất thải</p>
+                        </div>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" id="chk-relay-xaday" onchange="triggerRelayCommand('xaday', this.checked)" class="sr-only peer">
+                        <div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div>
+                    </label>
                 </div>
             </div>
 
-            <!-- Điều Khiển Quạt Nước & Xả Đáy Ao (Y10 - Y17) -->
-            <div class="glass-card p-4 rounded-2xl space-y-3">
-                <h3 class="font-bold text-xs uppercase tracking-wider text-emerald-400 flex items-center gap-2 border-b border-slate-700 pb-2">
-                    <i class="fa-solid fa-fan"></i> Điều Khiển Thiết Bị Từng Ao
-                </h3>
+            <!-- ĐIỀU KHIỂN CÁC BƠM TRUNG TÂM -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm space-y-3 border border-slate-200">
+                <h3 class="font-bold text-slate-700 text-xs uppercase tracking-wider border-b pb-2">Bơm & Van Trung Tâm (Dùng chung)</h3>
                 <div class="grid grid-cols-2 gap-2 text-xs">
-                    <button onclick="sendRelayCmd('Y10')" class="p-2.5 bg-slate-800 border border-slate-700 rounded-xl font-semibold text-left">QUẠT AO 1 (Y10)</button>
-                    <button onclick="sendRelayCmd('Y11')" class="p-2.5 bg-slate-800 border border-slate-700 rounded-xl font-semibold text-left">QUẠT AO 2 (Y11)</button>
-                    <button onclick="sendRelayCmd('Y12')" class="p-2.5 bg-slate-800 border border-slate-700 rounded-xl font-semibold text-left">QUẠT AO 3 (Y12)</button>
-                    <button onclick="sendRelayCmd('Y13')" class="p-2.5 bg-slate-800 border border-slate-700 rounded-xl font-semibold text-left">QUẠT AO 4 (Y13)</button>
-                    <button onclick="sendRelayCmd('Y14')" class="p-2.5 bg-slate-800 border border-slate-700 rounded-xl font-semibold text-left text-amber-400">XẢ ĐÁY AO 1 (Y14)</button>
-                    <button onclick="sendRelayCmd('Y15')" class="p-2.5 bg-slate-800 border border-slate-700 rounded-xl font-semibold text-left text-amber-400">XẢ ĐÁY AO 2 (Y15)</button>
-                    <button onclick="sendRelayCmd('Y16')" class="p-2.5 bg-slate-800 border border-slate-700 rounded-xl font-semibold text-left text-amber-400">XẢ ĐÁY AO 3 (Y16)</button>
-                    <button onclick="sendRelayCmd('Y17')" class="p-2.5 bg-slate-800 border border-slate-700 rounded-xl font-semibold text-left text-amber-400">XẢ ĐÁY AO 4 (Y17)</button>
+                    <button onclick="sendDirectRelay('Y4')" class="p-3 bg-slate-50 hover:bg-slate-100 border rounded-xl font-bold text-slate-700 text-left flex justify-between items-center">
+                        <span>BƠM AO (Y4)</span> <i class="fa-solid fa-power-off text-sky-600"></i>
+                    </button>
+                    <button onclick="sendDirectRelay('Y5')" class="p-3 bg-slate-50 hover:bg-slate-100 border rounded-xl font-bold text-slate-700 text-left flex justify-between items-center">
+                        <span>BƠM SẠCH (Y5)</span> <i class="fa-solid fa-power-off text-sky-600"></i>
+                    </button>
+                    <button onclick="sendDirectRelay('Y6')" class="p-3 bg-slate-50 hover:bg-slate-100 border rounded-xl font-bold text-slate-700 text-left flex justify-between items-center">
+                        <span>KHỬ TRÙNG (Y6)</span> <i class="fa-solid fa-power-off text-sky-600"></i>
+                    </button>
+                    <button onclick="sendDirectRelay('Y7')" class="p-3 bg-slate-50 hover:bg-slate-100 border rounded-xl font-bold text-slate-700 text-left flex justify-between items-center">
+                        <span>VAN XẢ THẢI (Y7)</span> <i class="fa-solid fa-power-off text-sky-600"></i>
+                    </button>
                 </div>
             </div>
         </section>
 
-        <!-- TAB 3: CÀI ĐẶT THỜI GIAN & NGƯỠNG (LW200 - LW229) -->
-        <section id="tab-settings" class="tab-content space-y-4 hidden">
-            
-            <!-- Cài đặt giới hạn ngưỡng an toàn -->
-            <div class="glass-card p-4 rounded-2xl space-y-3">
-                <h3 class="font-bold text-xs uppercase tracking-wider text-amber-400 border-b border-slate-700 pb-2">
-                    <i class="fa-solid fa-shield-halved"></i> Cài Đặt Giới Hạn Cảnh Báo
-                </h3>
-                <div class="space-y-2 text-xs">
-                    <div class="flex justify-between items-center bg-slate-800/50 p-2 rounded-xl">
-                        <span>Giới hạn pH (L - H)</span>
-                        <div class="space-x-1">
-                            <input id="set-lw200" type="number" value="7.5" class="w-14 bg-slate-900 border border-slate-700 text-center rounded p-1 font-bold text-emerald-400">
-                            <span>-</span>
-                            <input id="set-lw202" type="number" value="8.5" class="w-14 bg-slate-900 border border-slate-700 text-center rounded p-1 font-bold text-emerald-400">
-                        </div>
-                    </div>
-                    <div class="flex justify-between items-center bg-slate-800/50 p-2 rounded-xl">
-                        <span>Giới hạn EC (L - H)</span>
-                        <div class="space-x-1">
-                            <input id="set-lw204" type="number" value="3.0" class="w-14 bg-slate-900 border border-slate-700 text-center rounded p-1 font-bold text-amber-400">
-                            <span>-</span>
-                            <input id="set-lw206" type="number" value="18.0" class="w-14 bg-slate-900 border border-slate-700 text-center rounded p-1 font-bold text-amber-400">
-                        </div>
-                    </div>
+        <!-- TAB 3: HỘ CHIẾU SỐ THỦY SẢN -->
+        <section id="tab-passport" class="tab-content space-y-4 hidden">
+            <div class="bg-white rounded-2xl p-5 shadow-md border border-slate-200 text-center space-y-4">
+                <div class="border-b pb-3">
+                    <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">VERIFIED DIGITAL PASSPORT</span>
+                    <h2 class="text-lg font-black text-slate-800 mt-2">HỘ CHIẾU SỐ THỦY SẢN</h2>
+                    <p class="text-xs text-slate-500">Đầm tôm Cà Mau - <span id="passport-pond-name" class="font-black text-sky-700">AO NUÔI 3</span></p>
                 </div>
-            </div>
 
-            <!-- Cài đặt Timer Chu trình tự động -->
-            <div class="glass-card p-4 rounded-2xl space-y-3">
-                <h3 class="font-bold text-xs uppercase tracking-wider text-sky-400 border-b border-slate-700 pb-2">
-                    <i class="fa-solid fa-clock"></i> Cài Đặt Thời Gian Chu Trình (Giây)
-                </h3>
-                <div class="grid grid-cols-2 gap-2 text-xs">
-                    <div class="bg-slate-800/50 p-2 rounded-xl"><label class="block text-slate-400 text-[10px]">1. Thời gian nghỉ (LW218)</label><input id="set-lw218" type="number" value="60" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-center font-bold"></div>
-                    <div class="bg-slate-800/50 p-2 rounded-xl"><label class="block text-slate-400 text-[10px]">2. Thời gian xả thải (LW214)</label><input id="set-lw214" type="number" value="10" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-center font-bold"></div>
-                    <div class="bg-slate-800/50 p-2 rounded-xl"><label class="block text-slate-400 text-[10px]">3. Thời gian bơm nước (LW210)</label><input id="set-lw210" type="number" value="30" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-center font-bold"></div>
-                    <div class="bg-slate-800/50 p-2 rounded-xl"><label class="block text-slate-400 text-[10px]">4. Thời gian cảm biến đo (LW212)</label><input id="set-lw212" type="number" value="15" class="w-full bg-slate-900 border border-slate-700 rounded p-1 text-center font-bold"></div>
+                <div class="flex justify-center my-2">
+                    <div id="qrcode" class="p-3 bg-white border-2 border-dashed border-slate-300 rounded-xl"></div>
                 </div>
-                <button onclick="saveTimerSettings()" class="w-full py-2.5 bg-sky-600 hover:bg-sky-500 font-bold text-xs rounded-xl transition">LƯU CÀI ĐẶT THỜI GIAN</button>
-            </div>
-        </section>
+                <p class="text-[11px] text-slate-400">Quét mã QR để truy xuất nhật ký cảm biến 90 ngày của ao nuôi này</p>
 
-        <!-- TAB 4: EDGE AI DỰ BÁO OXY (ONNX WEB) -->
-        <section id="tab-ai" class="tab-content space-y-4 hidden">
-            <div class="glass-card p-5 rounded-2xl space-y-4">
-                <div class="flex justify-between items-center border-b border-slate-700 pb-3">
-                    <h3 class="font-black text-sm text-sky-400 flex items-center gap-2">
-                        <i class="fa-solid fa-microchip text-emerald-400"></i> WioT Edge AI Predictor
-                    </h3>
-                    <span class="text-[10px] bg-emerald-500/20 text-emerald-400 font-bold px-2 py-0.5 rounded border border-emerald-500/30">0$ API Token</span>
+                <div class="bg-slate-50 p-3 rounded-xl flex justify-between items-center text-left">
+                    <div>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase">Chỉ Số Chất Lượng Nước WQI</p>
+                        <p class="text-lg font-black text-emerald-600"><span id="wqi-score">95</span> / 100 <span class="text-xs font-normal text-slate-500">(Grade A+)</span></p>
+                    </div>
+                    <span class="text-xs bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-lg">ĐẠT CHUẨN XUẤT KHẨU</span>
                 </div>
-                <p class="text-xs text-slate-400">Chạy mô hình ONNX On-Device dự báo chỉ số Oxy hòa tan (DO) trong 3 giờ tới không cần gửi request lên Server.</p>
-                
-                <button onclick="runLocalAIPrediction()" class="w-full py-3 bg-emerald-600 hover:bg-emerald-500 font-bold text-xs rounded-xl transition shadow-lg flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-brain"></i> DỰ BÁO OXY TỰ ĐỘNG
+
+                <button onclick="window.print()" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl transition shadow flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> TẢI CHỨNG THƯ CHẤT LƯỢNG (PDF)
                 </button>
-
-                <div class="bg-slate-900 p-4 rounded-xl border border-slate-800 space-y-2">
-                    <span class="text-[10px] text-slate-400 uppercase font-semibold">Kết quả dự báo DO Ao 1:</span>
-                    <p class="text-3xl font-black text-emerald-400"><span id="ai-do-res">5.20</span> <span class="text-xs text-slate-500">mg/L</span></p>
-                    <p id="ai-prescription" class="text-xs text-slate-400">Trạng thái Oxy an toàn. Tiếp tục duy trì chu trình đo tự động.</p>
-                </div>
             </div>
         </section>
-
     </main>
 
-    <!-- BOTTOM NAVIGATION BAR -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-slate-800/95 border-t border-slate-700 flex justify-around p-2 z-50 backdrop-blur-lg">
-        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn active flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-400">
-            <i class="fa-solid fa-chart-pie text-lg mb-0.5"></i>
+    <!-- BOTTOM NAVIGATION TABS -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-2 z-50">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn active flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500">
+            <i class="fa-solid fa-chart-line text-lg mb-0.5"></i>
             <span>Giám sát</span>
         </button>
-        <button onclick="switchTab('control')" id="nav-control" class="tab-btn flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-400">
+        <button onclick="switchTab('control')" id="nav-control" class="tab-btn flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500">
             <i class="fa-solid fa-sliders text-lg mb-0.5"></i>
             <span>Điều khiển</span>
         </button>
-        <button onclick="switchTab('settings')" id="nav-settings" class="tab-btn flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-400">
-            <i class="fa-solid fa-gear text-lg mb-0.5"></i>
-            <span>Cài đặt</span>
-        </button>
-        <button onclick="switchTab('ai')" id="nav-ai" class="tab-btn flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-400">
-            <i class="fa-solid fa-brain text-lg mb-0.5"></i>
-            <span>Edge AI</span>
+        <button onclick="switchTab('passport')" id="nav-passport" class="tab-btn flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500">
+            <i class="fa-solid fa-qrcode text-lg mb-0.5"></i>
+            <span>Hộ chiếu số</span>
         </button>
     </nav>
 
     <!-- CLIENT LOGIC & API INTERACTION -->
     <script>
-        const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev"; // Điền Proxy URL Cloudflare
-        let refreshCountdown = 5;
+        const PROXY_URL = "https://wiot-proxy.your-subdomain.workers.dev";
+        const DEVICE_ID = "AQS-88902A34";
+
+        let activePond = "3";
+        let cachedTelemetryData = null;
+
+        const POND_RELAY_MAP = {
+            "1": { name: "AO NUÔI 1", van: "Y0", quat: "Y10", xaday: "Y14" },
+            "2": { name: "AO NUÔI 2", van: "Y1", quat: "Y11", xaday: "Y15" },
+            "3": { name: "AO NUÔI 3", van: "Y2", quat: "Y12", xaday: "Y16" },
+            "4": { name: "AO NUÔI 4", van: "Y3", quat: "Y13", xaday: "Y17" }
+        };
+
+        function changeActivePond(pondVal) {
+            activePond = pondVal;
+            const pondInfo = POND_RELAY_MAP[activePond];
+
+            // Cập nhật Tab Giám sát
+            document.getElementById('dash-pond-title').innerText = pondInfo.name;
+            renderPondTelemetry();
+
+            // Cập nhật Tab Điều khiển
+            document.getElementById('ctrl-pond-banner').innerText = pondInfo.name;
+            document.getElementById('ctrl-section-title').children[0].innerText = `THIẾT BỊ DÀNH RIÊNG CHO ${pondInfo.name}`;
+            
+            document.getElementById('label-relay-van').innerText = `Van Điện ${pondInfo.name} (${pondInfo.van})`;
+            document.getElementById('label-relay-quat').innerText = `Dàn Quạt Nước ${pondInfo.name} (${pondInfo.quat})`;
+            document.getElementById('label-relay-xaday').innerText = `Bơm Xả Đáy ${pondInfo.name} (${pondInfo.xaday})`;
+
+            document.getElementById('chk-relay-van').checked = false;
+            document.getElementById('chk-relay-quat').checked = false;
+            document.getElementById('chk-relay-xaday').checked = false;
+
+            // Cập nhật Tab Hộ chiếu số
+            document.getElementById('passport-pond-name').innerText = pondInfo.name;
+            generateQRCode();
+        }
 
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+            
             document.getElementById(`tab-${tabName}`).classList.remove('hidden');
             document.getElementById(`nav-${tabName}`).classList.add('active');
+
+            if (tabName === 'passport') {
+                generateQRCode();
+            }
         }
 
-        async function fetchWioTTelemetry() {
+        async function fetchTelemetryData() {
             try {
-                const res = await fetch(`${PROXY_URL}?action=get_dashboard`);
-                const data = await res.json();
-                
-                if (data && data.pond1) {
-                    document.getElementById('p1-ph').innerText = data.pond1.ph;
-                    document.getElementById('p1-ec').innerText = data.pond1.ec;
-                    document.getElementById('p1-orp').innerText = data.pond1.orp;
-                    document.getElementById('p1-temp').innerText = data.pond1.temp;
-                    document.getElementById('current-pond-id').innerText = `AO NUÔI ${data.current_pond}`;
-                }
-            } catch (err) {
+                const response = await fetch(`${PROXY_URL}?action=get_dashboard`);
+                cachedTelemetryData = await response.json();
+                renderPondTelemetry();
+            } catch (error) {
                 console.log("Sử dụng dữ liệu Demo WioT");
+                cachedTelemetryData = {
+                    timestamp: "07:51:33",
+                    pond1: { ph: "8.15", ec: "18.5", orp: "280", temp: "28.5" },
+                    pond2: { ph: "8.05", ec: "19.1", orp: "310", temp: "29.0" },
+                    pond3: { ph: "8.20", ec: "17.8", orp: "250", temp: "28.2" },
+                    pond4: { ph: "7.95", ec: "18.2", orp: "295", temp: "28.8" }
+                };
+                renderPondTelemetry();
             }
         }
 
-        async function sendRelayCmd(relayId) {
+        function renderPondTelemetry() {
+            if (!cachedTelemetryData) return;
+
+            const pondKey = `pond${activePond}`;
+            const pondData = cachedTelemetryData[pondKey] || cachedTelemetryData.pond3;
+
+            if (pondData) {
+                document.getElementById('val-ph').innerText = pondData.ph || "--.--";
+                document.getElementById('val-ec').innerText = pondData.ec || "--.--";
+                document.getElementById('val-orp').innerText = pondData.orp || "---";
+                document.getElementById('val-temp').innerText = pondData.temp || "--.-";
+                
+                // LẤY GIÁ TRỊ TỪ CỘT TIMESTAMP CỦA LOG GẦN NHẤT
+                if (cachedTelemetryData.timestamp) {
+                    // Nếu chuỗi chứa ngày giờ đầy đủ, trích xuất giờ:phút:giây
+                    const ts = String(cachedTelemetryData.timestamp);
+                    const timeOnly = ts.includes(' ') ? ts.split(' ')[1] : ts;
+                    document.getElementById('last-updated').innerText = timeOnly;
+                } else {
+                    document.getElementById('last-updated').innerText = new Date().toLocaleTimeString('vi-VN');
+                }
+
+                // Tính điểm WQI
+                const phNum = parseFloat(pondData.ph) || 8.0;
+                const orpNum = parseFloat(pondData.orp) || 250;
+                let wqi = 100;
+                if (phNum < 7.5 || phNum > 8.5) wqi -= 10;
+                if (orpNum < 200) wqi -= 15;
+                document.getElementById('wqi-score').innerText = wqi;
+            }
+        }
+
+        async function triggerRelayCommand(type, isChecked) {
+            const relayId = POND_RELAY_MAP[activePond][type];
+            const state = isChecked ? 1 : 0;
+            sendDirectRelay(relayId, state);
+        }
+
+        async function sendDirectRelay(relayId, state = 1) {
             try {
-                await fetch(`${PROXY_URL}?action=set_command&target_type=RELAY&target_id=${relayId}&target_val=1`);
-                alert(`Đã gửi cờ lệnh BẬT/TẮT rơ-le ${relayId} tới HMI Samkoon!`);
+                const url = `${PROXY_URL}?action=set_command&device_id=${DEVICE_ID}&relay_id=${relayId}&target_state=${state}`;
+                await fetch(url);
+                alert(`Đã gửi lệnh ${state === 1 ? 'BẬT' : 'TẮT'} ${relayId} cho ${POND_RELAY_MAP[activePond].name}!`);
             } catch (err) {
-                alert(`[DEMO] Đã đưa cờ lệnh ${relayId} vào hàng chờ!`);
+                alert(`[DEMO] Lệnh ${relayId} = ${state} đã đưa vào hàng chờ!`);
             }
         }
 
-        async function saveTimerSettings() {
-            const t210 = document.getElementById('set-lw210').value;
-            await fetch(`${PROXY_URL}?action=set_command&target_type=SETTING&target_id=LW210&target_val=${t210}`);
-            alert("Đã gửi cài đặt thời gian xuống C-Script HMI!");
-        }
-
-        // ONNX Runtime Web Edge AI Local Prediction
-        async function runLocalAIPrediction() {
-            const ph = parseFloat(document.getElementById('p1-ph').innerText) || 8.15;
-            const temp = parseFloat(document.getElementById('p1-temp').innerText) || 28.5;
-            const orp = parseFloat(document.getElementById('p1-orp').innerText) || 280;
+        function generateQRCode() {
+            const qrContainer = document.getElementById("qrcode");
+            qrContainer.innerHTML = "";
             
-            // Công thức AI suy luận tại thiết bị
-            let predictedDO = 8.0 - (temp * 0.1) - (ph * 0.15) + (orp * 0.003);
-            document.getElementById('ai-do-res').innerText = predictedDO.toFixed(2);
+            new QRCode(qrContainer, {
+                text: `https://aquasense.vn/passport?device=${DEVICE_ID}&pond=${activePond}`,
+                width: 140,
+                height: 140,
+                colorDark : "#0f172a",
+                colorLight : "#ffffff",
+                correctLevel : QRCode.CorrectLevel.H
+            });
         }
 
-        // Auto Refresh Interval
-        setInterval(() => {
-            refreshCountdown--;
-            if (refreshCountdown <= 0) {
-                fetchWioTTelemetry();
-                refreshCountdown = 5;
-            }
-            document.getElementById('refresh-timer').innerText = `${refreshCountdown}s`;
-        }, 1000);
-
-        window.onload = fetchWioTTelemetry;
+        setInterval(fetchTelemetryData, 5000);
+        window.onload = () => {
+            changeActivePond("3");
+            fetchTelemetryData();
+        };
     </script>
 </body>
 </html>
