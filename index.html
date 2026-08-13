@@ -296,7 +296,22 @@
     <!-- LOGIC SCRIPT -->
     <script>
         const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev";
-        const DEVICE_ID = "AQS-88902A34";
+        //const DEVICE_ID = "AQS-88902A34";
+        // =========================================================================
+        // TỰ ĐỘNG BẮT MÃ UNIQUEID TỪ QR CODE & LƯU BỘ NHỚ ĐIỆN THOẠI (SCAN-TO-CLAIM)
+        // =========================================================================
+        const urlParams = new URLSearchParams(window.location.search);
+        let scannedDevice = urlParams.get('device');
+        
+        // Nếu có quét mã QR mới -> Lưu ngay vào LocalStorage của điện thoại
+        if (scannedDevice && scannedDevice.startsWith("WIOT")) {
+            localStorage.setItem('WIOT_ACTIVE_DEVICE', scannedDevice);
+        }
+        
+        // Lấy mã thiết bị đã lưu, nếu chưa có thì dùng mã mặc định thử nghiệm
+        const DEVICE_ID = scannedDevice || localStorage.getItem('WIOT_ACTIVE_DEVICE') || "WIOT260813194512";
+        
+        console.log("Đã kết nối tới Tủ điều khiển:", DEVICE_ID);
 
         // ĐÃ SỬA: Chuyển biến khởi tạo sang "1" để đồng bộ với giao diện HTML
         let activePond = "1";
