@@ -45,9 +45,9 @@
                 <i class="fa-solid fa-fish text-sky-300"></i> BẬT AO NUÔI:
             </label>
             <select id="pond-select" onchange="changeActivePond(this.value)" class="bg-slate-900 text-sky-300 font-black text-xs px-3 py-1.5 rounded-lg border border-sky-500 focus:outline-none cursor-pointer">
-                <option value="1">AO NUÔI 1</option>
+                <option value="1"> selectedAO NUÔI 1</option>
                 <option value="2">AO NUÔI 2</option>
-                <option value="3" selected>AO NUÔI 3</option>
+                <option value="3">AO NUÔI 3</option>
                 <option value="4">AO NUÔI 4</option>
             </select>
         </div>
@@ -383,7 +383,7 @@
             });
         }
 
-        setInterval(fetchTelemetryData, 5000);
+        setInterval(fetchTelemetryData, 3000);
         window.onload = () => {
             changeActivePond("3");
             fetchTelemetryData();
