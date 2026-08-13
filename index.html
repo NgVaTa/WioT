@@ -37,7 +37,8 @@
                 <i class="fa-solid fa-water text-2xl text-sky-300"></i>
                 <div>
                     <h1 class="font-black text-lg leading-none tracking-wide">WioT</h1>
-                    <span class="text-[10px] text-sky-200">HỆ THỐNG ĐIỀU KHIỂN THÔNG MINH</span>
+                    <!-- ĐÃ SỬA: Hiển thị DEVICE_ID động thay thế cho chữ tĩnh -->
+                    <span id="header-device-id" class="text-[11px] font-mono font-bold text-sky-200 tracking-wider">AQS-260813194512</span>
                 </div>
             </div>
             <span id="connection-status" class="bg-emerald-500 text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 font-bold">
@@ -50,7 +51,6 @@
                 <i class="fa-solid fa-fish text-sky-300"></i> CHỌN AO NUÔI:
             </label>
             <select id="pond-select" onchange="changeActivePond(this.value)" class="bg-slate-900 text-sky-300 font-black text-xs px-3 py-1.5 rounded-lg border border-sky-500 focus:outline-none cursor-pointer">
-                <!-- ĐÃ SỬA: Chọn mặc định là Ao 1 -->
                 <option value="1" selected>AO NUÔI 1</option>
                 <option value="2">AO NUÔI 2</option>
                 <option value="3">AO NUÔI 3</option>
@@ -67,7 +67,6 @@
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                 <div>
                     <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Đang theo dõi</span>
-                    <!-- ĐÃ SỬA: Tiêu đề mặc định hiển thị lúc tải là Ao 1 -->
                     <h2 id="dash-pond-title" class="text-lg font-black text-sky-700">AO NUÔI 1</h2>
                 </div>
                 <div class="text-right flex items-center gap-2">
@@ -135,7 +134,7 @@
         <!-- TAB 2: ĐIỀU KHIỂN TỪ XA 1 CHIỀU -->
         <section id="tab-control" class="tab-content space-y-4 hidden">
             
-            <!-- NÚT CHUYỂN CHẾ ĐỘ AUTO / MANUAL (ĐỒNG BỘ LIGHT THEME) -->
+            <!-- NÚT CHUYỂN CHẾ ĐỘ AUTO / MANUAL -->
             <div id="btn-manual-toggle" onclick="toggleManualMode1Way()" class="cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 transition-all duration-200 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div id="manual-icon-box" class="p-3 bg-slate-100 text-slate-500 rounded-xl transition-all">
@@ -253,7 +252,6 @@
                 <div class="border-b pb-3">
                     <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">VERIFIED DIGITAL PASSPORT</span>
                     <h2 class="text-lg font-black text-slate-800 mt-2">HỘ CHIẾU SỐ THỦY SẢN</h2>
-                    <!-- ĐÃ SỬA: Tên mặc định hiển thị lúc tải là Ao 1 -->
                     <p class="text-xs text-slate-500">Đầm tôm Cà Mau - <span id="passport-pond-name" class="font-black text-sky-700">AO NUÔI 1</span></p>
                 </div>
 
@@ -296,9 +294,18 @@
     <!-- LOGIC SCRIPT -->
     <script>
         const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev";
-        const DEVICE_ID = "AQS-88902A34";
 
-        // ĐÃ SỬA: Chuyển biến khởi tạo sang "1" để đồng bộ với giao diện HTML
+        // ĐÃ BỔ SUNG: LOGIC TỰ ĐỘNG BẮT DEVICE_ID TỪ MÃ QR HOẶC LOCALSTORAGE (SCAN-TO-CLAIM)
+        const urlParams = new URLSearchParams(window.location.search);
+        let scannedDevice = urlParams.get('device');
+
+        if (scannedDevice && scannedDevice.startsWith("AQS-")) {
+            localStorage.setItem('WIOT_ACTIVE_DEVICE', scannedDevice);
+        }
+
+        // Ưu tiên dùng mã vừa quét -> mã trong bộ nhớ điện thoại -> mã mặc định dự phòng
+        const DEVICE_ID = scannedDevice || localStorage.getItem('WIOT_ACTIVE_DEVICE') || "WIOT123456789";
+
         let activePond = "1";
         let isManualMode = false;
         let cachedTelemetryData = null;
@@ -312,7 +319,6 @@
             "4": { name: "AO NUÔI 4", van: "Y3", quat: "Y13", xaday: "Y17" }
         };
 
-        // HÀM CHUYỂN ĐỔI AUTO / MANUAL VỚI GIAO DIỆN LIGHT THEME
         function toggleManualMode1Way() {
             isManualMode = !isManualMode;
             
@@ -430,7 +436,7 @@
 
         async function fetchTelemetryData() {
             try {
-                const response = await fetch(`${PROXY_URL}?action=get_dashboard`);
+                const response = await fetch(`${PROXY_URL}?action=get_dashboard&device_id=${DEVICE_ID}`);
                 cachedTelemetryData = await response.json();
                 renderPondTelemetry();
             } catch (error) {
@@ -448,7 +454,7 @@
             if (!cachedTelemetryData) return;
 
             const pondKey = `pond${activePond}`;
-            const pondData = cachedTelemetryData[pondKey] || cachedTelemetryData.pond1; // Sửa fallback thành pond1
+            const pondData = cachedTelemetryData[pondKey] || cachedTelemetryData.pond1;
 
             if (pondData) {
                 document.getElementById('val-ph').innerText = pondData.ph || "--.--";
@@ -484,7 +490,9 @@
 
         setInterval(fetchTelemetryData, 5000);
         window.onload = () => {
-            // ĐÃ SỬA: Hàm khởi tạo lúc tải trang tự động nạp "1"
+            // ĐÃ SỬA: Hiển thị giá trị DEVICE_ID thực tế lên Header khi ứng dụng khởi chạy
+            document.getElementById('header-device-id').innerText = DEVICE_ID;
+            
             changeActivePond("1");
             fetchTelemetryData();
         };
