@@ -37,8 +37,8 @@
                 <i class="fa-solid fa-water text-2xl text-sky-300"></i>
                 <div>
                     <h1 class="font-black text-lg leading-none tracking-wide">WioT</h1>
-                    <!-- ĐÃ SỬA: Hiển thị DEVICE_ID động thay thế cho chữ tĩnh -->
-                    <span id="header-device-id" class="text-[11px] font-mono font-bold text-sky-200 tracking-wider">AQS-260813194512</span>
+                    <!-- DEVICE_ID ĐỘNG TỰ ĐỘNG CẬP NHẬT TỪ QR CODE -->
+                    <span id="header-device-id" class="text-[11px] font-mono font-bold text-sky-200 tracking-wider">AQS-260814022755</span>
                 </div>
             </div>
             <span id="connection-status" class="bg-emerald-500 text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 font-bold">
@@ -131,10 +131,8 @@
             </div>
         </section>
 
-        <!-- TAB 2: ĐIỀU KHIỂN TỪ XA 1 CHIỀU -->
+        <!-- TAB 2: ĐIỀU KHIỂN TỪ XA -->
         <section id="tab-control" class="tab-content space-y-4 hidden">
-            
-            <!-- NÚT CHUYỂN CHẾ ĐỘ AUTO / MANUAL -->
             <div id="btn-manual-toggle" onclick="toggleManualMode1Way()" class="cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 transition-all duration-200 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div id="manual-icon-box" class="p-3 bg-slate-100 text-slate-500 rounded-xl transition-all">
@@ -150,10 +148,7 @@
                 </div>
             </div>
 
-            <!-- BẢNG CÔNG TẮC ĐIỀU KHIỂN -->
             <div id="control-panel-container" class="opacity-50 pointer-events-none transition-all duration-300 space-y-4">
-                
-                <!-- THIẾT BỊ THEO AO -->
                 <div class="bg-white rounded-2xl p-4 shadow-sm space-y-4 border border-slate-200">
                     <h3 id="ctrl-section-title" class="font-black text-sky-700 text-xs uppercase tracking-wider border-b pb-2 flex items-center justify-between">
                         <span>THIẾT BỊ DÀNH RIÊNG CHO AO NUÔI 1</span>
@@ -203,11 +198,9 @@
                     </div>
                 </div>
 
-                <!-- BƠM TRUNG TÂM -->
                 <div class="bg-white rounded-2xl p-4 shadow-sm space-y-3 border border-slate-200">
                     <h3 class="font-bold text-slate-700 text-xs uppercase tracking-wider border-b pb-2">Bơm & Van Trung Tâm (Toggle ON/OFF)</h3>
                     <div class="grid grid-cols-2 gap-2 text-xs">
-                        
                         <button id="btn-relay-Y4" onclick="toggleCommonRelay1Way('Y4')" class="p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-700 text-left flex justify-between items-center transition-all">
                             <div>
                                 <p class="text-xs">BƠM AO (Y4)</p>
@@ -239,10 +232,8 @@
                             </div>
                             <i id="icon-Y7" class="fa-solid fa-power-off text-slate-400 text-base"></i>
                         </button>
-
                     </div>
                 </div>
-
             </div>
         </section>
 
@@ -295,7 +286,7 @@
     <script>
         const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev";
 
-        // ĐÃ BỔ SUNG: LOGIC TỰ ĐỘNG BẮT DEVICE_ID TỪ MÃ QR HOẶC LOCALSTORAGE (SCAN-TO-CLAIM)
+        // TỰ ĐỘNG BẮT DEVICE_ID TỪ MÃ QR HOẶC LOCALSTORAGE (SCAN-TO-CLAIM)
         const urlParams = new URLSearchParams(window.location.search);
         let scannedDevice = urlParams.get('device');
 
@@ -303,7 +294,6 @@
             localStorage.setItem('WIOT_ACTIVE_DEVICE', scannedDevice);
         }
 
-        // Ưu tiên dùng mã vừa quét -> mã trong bộ nhớ điện thoại -> mã mặc định dự phòng
         const DEVICE_ID = scannedDevice || localStorage.getItem('WIOT_ACTIVE_DEVICE') || "WIOT123456789";
 
         let activePond = "1";
@@ -441,10 +431,10 @@
                 renderPondTelemetry();
             } catch (error) {
                 cachedTelemetryData = {
-                    pond1: { ph: "8.15", ec: "18.5", orp: "280", temp: "28.5", ts: "07:41:05", date: "13/08/2026" },
-                    pond2: { ph: "8.05", ec: "19.1", orp: "310", temp: "29.0", ts: "07:45:22", date: "13/08/2026" },
-                    pond3: { ph: "8.20", ec: "17.8", orp: "250", temp: "28.2", ts: "07:51:33", date: "13/08/2026" },
-                    pond4: { ph: "7.95", ec: "18.2", orp: "295", temp: "28.8", ts: "07:56:10", date: "13/08/2026" }
+                    pond1: { ph: "8.15", ec: "18.5", orp: "280", temp: "28.5", ts: "07:41:05", date: "14/08/2026" },
+                    pond2: { ph: "8.05", ec: "19.1", orp: "310", temp: "29.0", ts: "07:45:22", date: "14/08/2026" },
+                    pond3: { ph: "8.20", ec: "17.8", orp: "250", temp: "28.2", ts: "07:51:33", date: "14/08/2026" },
+                    pond4: { ph: "7.95", ec: "18.2", orp: "295", temp: "28.8", ts: "07:56:10", date: "14/08/2026" }
                 };
                 renderPondTelemetry();
             }
@@ -490,9 +480,7 @@
 
         setInterval(fetchTelemetryData, 5000);
         window.onload = () => {
-            // ĐÃ SỬA: Hiển thị giá trị DEVICE_ID thực tế lên Header khi ứng dụng khởi chạy
             document.getElementById('header-device-id').innerText = DEVICE_ID;
-            
             changeActivePond("1");
             fetchTelemetryData();
         };
