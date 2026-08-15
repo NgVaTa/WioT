@@ -262,19 +262,27 @@
                 </div>
                 <p id="ui-passport-desc" class="text-gray-400 text-xs text-center mt-2 mb-4">Quét mã QR để truy xuất nhật ký cảm biến của ao nuôi này</p>
 
-                <div class="bg-gray-50 rounded-xl p-4 flex justify-between items-center mb-4">
-                <div>
-                    <p class="text-xs font-bold text-gray-400">CHỈ SỐ CHẤT LƯỢNG NƯỚC WQI</p>
-                    <div class="flex items-baseline">
-                        <span id="ui-passport-wqi" class="text-4xl font-black text-emerald-600">--</span>
-                        <span class="text-xl font-bold text-gray-400 ml-1">/ 100</span>
-                        <span id="ui-passport-grade" class="text-xs font-bold text-gray-500 ml-2"></span>
+                <!-- Cập nhật Điểm WQI và Trạng thái -->
+                <div class="bg-gray-50 rounded-xl p-4 mb-4 border border-gray-100 shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <div>
+                            <p class="text-xs font-bold text-gray-400">CHỈ SỐ CHẤT LƯỢNG NƯỚC WQI</p>
+                            <div class="flex items-baseline mt-1">
+                                <span id="ui-passport-wqi" class="text-4xl font-black text-emerald-600">--</span>
+                                <span class="text-xl font-bold text-gray-400 ml-1">/ 100</span>
+                                <span id="ui-passport-grade" class="text-xs font-bold text-gray-500 ml-2"></span>
+                            </div>
+                        </div>
+                        <div id="ui-passport-badge" class="bg-slate-300 text-white font-bold py-2 px-4 rounded-lg text-xs text-center w-28 shadow-sm">
+                            ĐANG TẢI...
+                        </div>
+                    </div>
+                    
+                    <!-- VÙNG UI MỚI: CHẨN ĐOÁN NGUYÊN NHÂN THEO CHUẨN ASC/BAP -->
+                    <div id="ui-passport-diagnostics" class="pt-3 border-t border-gray-200 flex flex-wrap gap-2 hidden">
+                        <!-- Các tag cảnh báo sẽ được JavaScript bơm vào đây -->
                     </div>
                 </div>
-                <div id="ui-passport-badge" class="bg-slate-300 text-white font-bold py-2 px-4 rounded-lg text-xs text-center w-28">
-                    ĐANG TẢI...
-                </div>
-            </div>
 
                 <button onclick="downloadCertificatePDF(this)" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl transition shadow flex items-center justify-center gap-2">
                     <i class="fa-solid fa-file-pdf"></i> TẢI CHỨNG THƯ CHẤT LƯỢNG (PDF)
@@ -700,27 +708,29 @@
 
                 if (data.status === "SUCCESS") {
                     const wqi = data.wqi_score;
+                    const latest = data.latest; // Lấy bộ dữ liệu đo gần nhất
                     const totalRecords = data.history ? data.history.length : 0;
 
                     if (wqiEl) wqiEl.innerText = wqi;
-                    if (descEl) descEl.innerText = `Quét mã QR để truy xuất nhật ký cảm biến ${totalRecords} bản ghi gần nhất của ao nuôi này`;
+                    if (descEl) descEl.innerText = `Quét mã QR để truy xuất ${totalRecords} bản ghi gần nhất của ao nuôi này. Tiêu chuẩn áp dụng: ASC / BAP.`;
 
-                    // Tính toán Grade và Màu sắc hiển thị
+                    // 1. TÍNH TOÁN GRADE VÀ MÀU SẮC TỔNG THỂ
                     let grade = "";
                     let badgeText = "";
-                    let badgeClass = "text-white font-bold py-2 px-4 rounded-lg text-xs text-center w-28 ";
+                    let badgeClass = "text-white font-bold py-2 px-4 rounded-lg text-xs text-center w-28 shadow-sm ";
 
+                    // Điều chỉnh lại thang đo hiển thị cho khắt khe hơn theo chuẩn quốc tế
                     if (wqi >= 90) {
-                        grade = "(Grade A+)"; badgeText = "XUẤT SẮC"; badgeClass += "bg-emerald-500";
+                        grade = "(Hạng A+)"; badgeText = "XUẤT SẮC"; badgeClass += "bg-emerald-500";
                         wqiEl.className = "text-4xl font-black text-emerald-500";
-                    } else if (wqi >= 70) {
-                        grade = "(Grade A)"; badgeText = "ĐẠT CHUẨN"; badgeClass += "bg-emerald-500";
-                        wqiEl.className = "text-4xl font-black text-emerald-500";
+                    } else if (wqi >= 75) {
+                        grade = "(Hạng A)"; badgeText = "ĐẠT CHUẨN"; badgeClass += "bg-emerald-400";
+                        wqiEl.className = "text-4xl font-black text-emerald-400";
                     } else if (wqi >= 50) {
-                        grade = "(Grade B)"; badgeText = "CẦN CẢI THIỆN"; badgeClass += "bg-amber-500";
+                        grade = "(Hạng B)"; badgeText = "CẦN LƯU Ý"; badgeClass += "bg-amber-500";
                         wqiEl.className = "text-4xl font-black text-amber-500";
                     } else {
-                        grade = "(Grade C)"; badgeText = "NGUY HIỂM"; badgeClass += "bg-rose-500";
+                        grade = "(Hạng C)"; badgeText = "NGUY HIỂM"; badgeClass += "bg-rose-500";
                         wqiEl.className = "text-4xl font-black text-rose-500";
                     }
 
@@ -728,6 +738,41 @@
                     if (badgeEl) {
                         badgeEl.innerText = badgeText;
                         badgeEl.className = badgeClass;
+                    }
+
+                    // 2. CHẨN ĐOÁN CHI TIẾT CÁC LỖI VI PHẠM (DIAGNOSTICS)
+                    const diagEl = document.getElementById('ui-passport-diagnostics');
+                    if (diagEl && latest) {
+                        let diagHTML = "";
+                        
+                        const ph = parseFloat(latest.ph) || 0;
+                        const temp = parseFloat(latest.temp) || 0;
+                        const orp = parseFloat(latest.orp) || 0;
+                        const ec = parseFloat(latest.ec) || 0;
+
+                        // Kiểm tra pH
+                        if (ph < 7.0 || ph > 9.0) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>pH Nguy hiểm (${ph})</span>`;
+                        else if (ph < 7.5 || ph > 8.5) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-circle-exclamation mr-1"></i>pH Khá xấu (${ph})</span>`;
+
+                        // Kiểm tra Nhiệt độ
+                        if (temp < 24 || temp > 34) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-temperature-arrow-up mr-1"></i>Nhiệt độ Sốc (${temp}°C)</span>`;
+                        else if (temp < 26 || temp > 32) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-temperature-half mr-1"></i>Nhiệt độ Bất lợi (${temp}°C)</span>`;
+
+                        // Kiểm tra ORP
+                        if (orp < 150) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-skull-crossbones mr-1"></i>Đáy ao độc hại (${orp}mV)</span>`;
+                        else if (orp < 200) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-water mr-1"></i>Đáy ao bẩn (${orp}mV)</span>`;
+
+                        // Kiểm tra Độ mặn
+                        if (ec < 5 || ec > 35) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-droplet mr-1"></i>Độ mặn Sốc (${ec}ppt)</span>`;
+                        else if (ec < 10 || ec > 30) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-droplet mr-1"></i>Độ mặn Bất lợi (${ec}ppt)</span>`;
+
+                        // Nếu nước hoàn hảo
+                        if (diagHTML === "") {
+                            diagHTML = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-check-circle mr-1"></i>Các chỉ số sinh hóa đều ở mức lý tưởng</span>`;
+                        }
+
+                        diagEl.innerHTML = diagHTML;
+                        diagEl.classList.remove('hidden'); // Hiển thị khung chẩn đoán
                     }
                 }
             } catch (error) {
