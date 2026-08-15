@@ -37,7 +37,8 @@
                 <i class="fa-solid fa-water text-2xl text-sky-300"></i>
                 <div>
                     <h1 class="font-black text-lg leading-none tracking-wide">WioT</h1>
-                    <span class="text-[10px] text-sky-200">HỆ THỐNG ĐIỀU KHIỂN THÔNG MINH</span>
+                    <!-- DEVICE_ID ĐỘNG TỰ ĐỘNG CẬP NHẬT TỪ QR CODE -->
+                    <span id="header-device-id" class="text-[11px] font-mono font-bold text-sky-200 tracking-wider">AQS-260814022755</span>
                 </div>
             </div>
             <span id="connection-status" class="bg-emerald-500 text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 font-bold">
@@ -50,7 +51,6 @@
                 <i class="fa-solid fa-fish text-sky-300"></i> CHỌN AO NUÔI:
             </label>
             <select id="pond-select" onchange="changeActivePond(this.value)" class="bg-slate-900 text-sky-300 font-black text-xs px-3 py-1.5 rounded-lg border border-sky-500 focus:outline-none cursor-pointer">
-                <!-- ĐÃ SỬA: Chọn mặc định là Ao 1 -->
                 <option value="1" selected>AO NUÔI 1</option>
                 <option value="2">AO NUÔI 2</option>
                 <option value="3">AO NUÔI 3</option>
@@ -67,7 +67,6 @@
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                 <div>
                     <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Đang theo dõi</span>
-                    <!-- ĐÃ SỬA: Tiêu đề mặc định hiển thị lúc tải là Ao 1 -->
                     <h2 id="dash-pond-title" class="text-lg font-black text-sky-700">AO NUÔI 1</h2>
                 </div>
                 <div class="text-right flex items-center gap-2">
@@ -132,10 +131,8 @@
             </div>
         </section>
 
-        <!-- TAB 2: ĐIỀU KHIỂN TỪ XA 1 CHIỀU -->
+        <!-- TAB 2: ĐIỀU KHIỂN TỪ XA -->
         <section id="tab-control" class="tab-content space-y-4 hidden">
-            
-            <!-- NÚT CHUYỂN CHẾ ĐỘ AUTO / MANUAL (ĐỒNG BỘ LIGHT THEME) -->
             <div id="btn-manual-toggle" onclick="toggleManualMode1Way()" class="cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 transition-all duration-200 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div id="manual-icon-box" class="p-3 bg-slate-100 text-slate-500 rounded-xl transition-all">
@@ -151,10 +148,7 @@
                 </div>
             </div>
 
-            <!-- BẢNG CÔNG TẮC ĐIỀU KHIỂN -->
             <div id="control-panel-container" class="opacity-50 pointer-events-none transition-all duration-300 space-y-4">
-                
-                <!-- THIẾT BỊ THEO AO -->
                 <div class="bg-white rounded-2xl p-4 shadow-sm space-y-4 border border-slate-200">
                     <h3 id="ctrl-section-title" class="font-black text-sky-700 text-xs uppercase tracking-wider border-b pb-2 flex items-center justify-between">
                         <span>THIẾT BỊ DÀNH RIÊNG CHO AO NUÔI 1</span>
@@ -204,11 +198,9 @@
                     </div>
                 </div>
 
-                <!-- BƠM TRUNG TÂM -->
                 <div class="bg-white rounded-2xl p-4 shadow-sm space-y-3 border border-slate-200">
                     <h3 class="font-bold text-slate-700 text-xs uppercase tracking-wider border-b pb-2">Bơm & Van Trung Tâm (Toggle ON/OFF)</h3>
                     <div class="grid grid-cols-2 gap-2 text-xs">
-                        
                         <button id="btn-relay-Y4" onclick="toggleCommonRelay1Way('Y4')" class="p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-700 text-left flex justify-between items-center transition-all">
                             <div>
                                 <p class="text-xs">BƠM AO (Y4)</p>
@@ -240,10 +232,8 @@
                             </div>
                             <i id="icon-Y7" class="fa-solid fa-power-off text-slate-400 text-base"></i>
                         </button>
-
                     </div>
                 </div>
-
             </div>
         </section>
 
@@ -253,7 +243,6 @@
                 <div class="border-b pb-3">
                     <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">VERIFIED DIGITAL PASSPORT</span>
                     <h2 class="text-lg font-black text-slate-800 mt-2">HỘ CHIẾU SỐ THỦY SẢN</h2>
-                    <!-- ĐÃ SỬA: Tên mặc định hiển thị lúc tải là Ao 1 -->
                     <p class="text-xs text-slate-500">Đầm tôm Cà Mau - <span id="passport-pond-name" class="font-black text-sky-700">AO NUÔI 1</span></p>
                 </div>
 
@@ -296,9 +285,17 @@
     <!-- LOGIC SCRIPT -->
     <script>
         const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev";
-        const DEVICE_ID = "AQS-88902A34";
 
-        // ĐÃ SỬA: Chuyển biến khởi tạo sang "1" để đồng bộ với giao diện HTML
+        // TỰ ĐỘNG BẮT DEVICE_ID TỪ MÃ QR HOẶC LOCALSTORAGE (SCAN-TO-CLAIM)
+        const urlParams = new URLSearchParams(window.location.search);
+        let scannedDevice = urlParams.get('device');
+
+        if (scannedDevice && scannedDevice.startsWith("AQS-")) {
+            localStorage.setItem('WIOT_ACTIVE_DEVICE', scannedDevice);
+        }
+
+        const DEVICE_ID = scannedDevice || localStorage.getItem('WIOT_ACTIVE_DEVICE') || "WIOT123456789";
+
         let activePond = "1";
         let isManualMode = false;
         let cachedTelemetryData = null;
@@ -312,7 +309,6 @@
             "4": { name: "AO NUÔI 4", van: "Y3", quat: "Y13", xaday: "Y17" }
         };
 
-        // HÀM CHUYỂN ĐỔI AUTO / MANUAL VỚI GIAO DIỆN LIGHT THEME
         function toggleManualMode1Way() {
             isManualMode = !isManualMode;
             
@@ -430,15 +426,15 @@
 
         async function fetchTelemetryData() {
             try {
-                const response = await fetch(`${PROXY_URL}?action=get_dashboard`);
+                const response = await fetch(`${PROXY_URL}?action=get_dashboard&device_id=${DEVICE_ID}`);
                 cachedTelemetryData = await response.json();
                 renderPondTelemetry();
             } catch (error) {
                 cachedTelemetryData = {
-                    pond1: { ph: "8.15", ec: "18.5", orp: "280", temp: "28.5", ts: "07:41:05", date: "13/08/2026" },
-                    pond2: { ph: "8.05", ec: "19.1", orp: "310", temp: "29.0", ts: "07:45:22", date: "13/08/2026" },
-                    pond3: { ph: "8.20", ec: "17.8", orp: "250", temp: "28.2", ts: "07:51:33", date: "13/08/2026" },
-                    pond4: { ph: "7.95", ec: "18.2", orp: "295", temp: "28.8", ts: "07:56:10", date: "13/08/2026" }
+                    pond1: { ph: "8.15", ec: "18.5", orp: "280", temp: "28.5", ts: "07:41:05", date: "14/08/2026" },
+                    pond2: { ph: "8.05", ec: "19.1", orp: "310", temp: "29.0", ts: "07:45:22", date: "14/08/2026" },
+                    pond3: { ph: "8.20", ec: "17.8", orp: "250", temp: "28.2", ts: "07:51:33", date: "14/08/2026" },
+                    pond4: { ph: "7.95", ec: "18.2", orp: "295", temp: "28.8", ts: "07:56:10", date: "14/08/2026" }
                 };
                 renderPondTelemetry();
             }
@@ -448,7 +444,7 @@
             if (!cachedTelemetryData) return;
 
             const pondKey = `pond${activePond}`;
-            const pondData = cachedTelemetryData[pondKey] || cachedTelemetryData.pond1; // Sửa fallback thành pond1
+            const pondData = cachedTelemetryData[pondKey] || cachedTelemetryData.pond1;
 
             if (pondData) {
                 document.getElementById('val-ph').innerText = pondData.ph || "--.--";
@@ -484,7 +480,7 @@
 
         setInterval(fetchTelemetryData, 5000);
         window.onload = () => {
-            // ĐÃ SỬA: Hàm khởi tạo lúc tải trang tự động nạp "1"
+            document.getElementById('header-device-id').innerText = DEVICE_ID;
             changeActivePond("1");
             fetchTelemetryData();
         };
