@@ -492,22 +492,25 @@
           });
         }
             
+        // =====================================================================
+        // TỰ ĐỘNG XUẤT CHỨNG THƯ PDF (CHỐNG TRÀN RAM, CHỐNG ĐƠ APP MOBILE)
+        // =====================================================================
         async function downloadCertificatePDF(btnElement) {
             const originalText = btnElement.innerHTML;
             btnElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẠO PDF...`;
             btnElement.disabled = true;
 
             try {
+                // 1. LẤY DỮ LIỆU
                 const url = `${PROXY_URL}?action=get_passport&device_id=${DEVICE_ID}&pond=${activePond}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
                 if (data.status !== "SUCCESS" || !data.history || data.history.length === 0) {
-                    alert(`Không thể xuất chứng thư!\n\nChi tiết lỗi từ Server:\nTrạng thái: ${data.status}\nThiết bị: ${DEVICE_ID}\nAo số: ${activePond}\nBản ghi tìm thấy: ${data.history ? data.history.length : 0}`);
+                    alert(`Không thể xuất chứng thư!\n\nChi tiết: ${data.status}`);
                     return;
                 }
 
-                // 1. RENDER BẢNG DỮ LIỆU
                 const tableRows = data.history.map((row, index) => `
                     <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f8fafc'}; border-bottom: 1px solid #e2e8f0;">
                         <td style="padding: 12px; text-align: center; font-size: 13px; color: #475569;">${row.timestamp}</td>
@@ -521,26 +524,23 @@
                 const wqiColor = data.wqi_score >= 70 ? '#10b981' : '#f59e0b';
                 const wqiText = data.wqi_score >= 70 ? 'ĐẠT CHUẨN XUẤT KHẨU' : 'CẦN CẢI THIỆN MÔI TRƯỜNG';
 
-                // 2. TEMPLATE HTML (KHÓA CHẶT KÍCH THƯỚC)
+                // 2. TEMPLATE HTML
                 const pdfHTML = `
                     <div id="print-wrapper" style="width: 794px; background: white; margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif;">
                         
-                        <!-- TRANG 1: MẶT TRƯỚC (Khóa cứng 1122px, Khóa Overflow) -->
+                        <!-- TRANG 1: Khóa cứng 1122px chống tràn -->
                         <div style="width: 794px; height: 1122px; padding: 40px; box-sizing: border-box; position: relative; overflow: hidden;">
-                            
-                            <!-- Watermark -->
-                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.04; pointer-events: none; z-index: 0;">
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.04; z-index: 0;">
                                 <img src="./logo.png" style="width: 550px; height: auto;">
                             </div>
 
-                            <!-- Khung viền -->
                             <div style="position: relative; z-index: 1; border: 3px solid #003882; padding: 4px; height: 100%; box-sizing: border-box;">
                                 <div style="border: 1px solid #1ea6d9; padding: 50px 40px; text-align: center; height: 100%; box-sizing: border-box; background: linear-gradient(to bottom, #ffffff, #f4f9ff); position: relative;">
                                     
                                     <img src="./logo.png" style="width: 320px; height: auto; margin-bottom: 20px; display: inline-block;">
                                     
-                                    <h1 style="font-size: 34px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 10px 0 5px 0; letter-spacing: 1px;">CHỨNG THƯ CHẤT LƯỢNG NƯỚC</h1>
-                                    <h2 style="font-size: 26px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px;">THỦY SẢN</h2>
+                                    <h1 style="font-size: 34px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 10px 0 5px 0;">CHỨNG THƯ CHẤT LƯỢNG NƯỚC</h1>
+                                    <h2 style="font-size: 26px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 0 0 5px 0;">THỦY SẢN</h2>
                                     <p style="font-size: 14px; color: #1ea6d9; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin-top: 5px;">Water Quality Certificate</p>
                                     
                                     <hr style="width: 100px; border: 2px solid #1ea6d9; margin: 30px auto;">
@@ -549,15 +549,14 @@
                                     <p style="font-size: 18px; color: #334155; margin: 15px 0;">Khu vực quan trắc: <span style="font-weight: bold; color: #003882;">AO NUÔI ${activePond}</span></p>
                                     <p style="font-size: 15px; color: #64748b; margin: 15px 0;">Ngày trích xuất: <span style="font-weight: bold;">${new Date().toLocaleDateString('vi-VN')}</span></p>
                                     
-                                    <div style="margin: 40px auto; padding: 40px 30px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 56, 130, 0.08); width: 70%; border-top: 5px solid #1ea6d9; box-sizing: border-box;">
+                                    <div style="margin: 40px auto; padding: 40px 30px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 56, 130, 0.08); width: 70%; border-top: 5px solid #1ea6d9;">
                                         <p style="font-size: 15px; font-weight: bold; color: #64748b; margin-bottom: 20px;">CHỈ SỐ CHẤT LƯỢNG NƯỚC TỔNG HỢP (WQI)</p>
                                         <p style="font-size: 80px; font-weight: 900; color: #003882; margin: 0; line-height: 1;">${data.wqi_score} <span style="font-size: 28px; color: #94a3b8;">/ 100</span></p>
-                                        <div style="display: inline-block; background: ${wqiColor}; color: white; padding: 12px 28px; border-radius: 50px; font-weight: bold; font-size: 16px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1px;">
+                                        <div style="display: inline-block; background: ${wqiColor}; color: white; padding: 12px 28px; border-radius: 50px; font-weight: bold; font-size: 16px; margin-top: 30px;">
                                             ${wqiText}
                                         </div>
                                     </div>
                                     
-                                    <!-- FOOTER: Ghim Absolute chết ở dưới đáy, cách đường viền 40px -->
                                     <div style="position: absolute; bottom: 40px; left: 0; right: 0; text-align: center;">
                                         <p style="font-size: 13px; font-style: italic; color: #64748b; line-height: 1.6; margin: 0 40px;">
                                             Chứng thư được cấp tự động bởi Hệ thống Quan trắc Nông nghiệp thông minh <strong>WioT AquaSense</strong>.<br>
@@ -568,20 +567,19 @@
                             </div>
                         </div>
 
-                        <!-- CÔNG CỤ ÉP NGẮT TRANG PDF -->
                         <div class="html2pdf__page-break"></div>
 
-                        <!-- TRANG 2: PHỤ LỤC DATA LOGS -->
+                        <!-- TRANG 2: PHỤ LỤC -->
                         <div style="width: 794px; padding: 40px; box-sizing: border-box;">
                             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #003882; padding-bottom: 15px; margin-bottom: 25px;">
                                 <div>
                                     <h2 style="font-size: 22px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 0;">PHỤ LỤC: NHẬT KÝ QUAN TRẮC MÔI TRƯỜNG</h2>
-                                    <p style="font-size: 13px; color: #64748b; margin: 6px 0 0 0;">Trích xuất ${data.history.length} bản ghi gần nhất. Đo tự động bằng hệ thống cảm biến chuẩn công nghiệp.</p>
+                                    <p style="font-size: 13px; color: #64748b; margin: 6px 0 0 0;">Trích xuất ${data.history.length} bản ghi gần nhất.</p>
                                 </div>
                                 <img src="./logo.png" style="width: 140px; height: auto;">
                             </div>
                             
-                            <table style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px #e2e8f0;">
+                            <table style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden;">
                                 <thead>
                                     <tr style="background: #003882;">
                                         <th style="padding: 14px; text-align: center; font-size: 13px; font-weight: bold; color: white;">Thời gian quét</th>
@@ -591,34 +589,42 @@
                                         <th style="padding: 14px; text-align: center; font-size: 13px; font-weight: bold; color: white;">Nhiệt độ (°C)</th>
                                     </tr>
                                 </thead>
-                                <tbody>
-                                    ${tableRows}
-                                </tbody>
+                                <tbody>${tableRows}</tbody>
                             </table>
                         </div>
                     </div>
                 `;
 
-                // 3. TẠO CONTAINER CÁCH LY (Cách ly Viewport của điện thoại)
+                // 3. TẠO CONTAINER AN TOÀN (Thread-Safe Wrapper)
                 const container = document.createElement('div');
                 container.innerHTML = pdfHTML;
-                
-                // Ghim ngoài màn hình hiển thị để điện thoại không tự bóp méo giao diện
-                container.style.position = 'fixed'; 
+                // Dùng absolute thay vì fixed, và giấu bằng z-index thay vì đẩy ra khỏi màn hình
+                container.style.position = 'absolute'; 
                 container.style.top = '0';
-                container.style.left = '-9999px';
+                container.style.left = '0';
                 container.style.width = '794px';
-                // Đảm bảo trình duyệt không làm text bọc dòng sai lệch
-                container.style.transform = 'scale(1)'; 
+                container.style.zIndex = '-9999';
+                container.style.opacity = '0.01'; // Giữ mức cực nhỏ để Canvas vẫn bắt được nhưng mắt người không thấy
+                container.style.pointerEvents = 'none';
                 document.body.appendChild(container);
 
-                // 4. CẤU HÌNH VÀ XUẤT FILE
+                // *** BƯỚC CỨU CÁNH: Ép App "nghỉ ngơi" 800ms để render DOM và tải Logo xong xuôi ***
+                await new Promise(resolve => setTimeout(resolve, 800));
+
+                // 4. KIỂM TRA THIẾT BỊ ĐỂ GIẢM TẢI RAM TỰ ĐỘNG
+                const isMobile = window.innerWidth < 768;
+
                 const opt = {
                     margin:       0, 
                     filename:     `WioT_ChungThu_Ao${activePond}_${DEVICE_ID}.pdf`,
-                    image:        { type: 'jpeg', quality: 1.0 },
-                    // Ép chuẩn màn hình thành 794px khi chụp ảnh canvas
-                    html2canvas:  { scale: 2, useCORS: true, windowWidth: 794, width: 794, letterRendering: true }, 
+                    image:        { type: 'jpeg', quality: 0.95 }, // Giảm nhẹ chất lượng ảnh để cứu RAM
+                    html2canvas:  { 
+                        scale: isMobile ? 1.2 : 2, // THUẬT TOÁN LÕI: Mobile chỉ dùng scale 1.2 chống đơ RAM
+                        useCORS: true, 
+                        windowWidth: 794, 
+                        width: 794, 
+                        logging: false 
+                    }, 
                     jsPDF:        { unit: 'px', format: [794, 1123], orientation: 'portrait' } 
                 };
 
@@ -628,7 +634,7 @@
 
             } catch (error) {
                 console.error("Lỗi xuất PDF:", error);
-                alert("Đã xảy ra lỗi khi tạo chứng thư. Vui lòng thử lại!");
+                alert("Đã xảy ra lỗi khi tạo chứng thư. Vui lòng kiểm tra lại kết nối mạng!");
             } finally {
                 btnElement.innerHTML = originalText;
                 btnElement.disabled = false;
