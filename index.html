@@ -495,6 +495,9 @@
         // =====================================================================
         // TỰ ĐỘNG XUẤT CHỨNG THƯ PDF + PHỤ LỤC DATA (ĐÃ FIX KHUNG A4 VÀ LOGO)
         // =====================================================================
+        // =====================================================================
+        // TỰ ĐỘNG XUẤT CHỨNG THƯ PDF + PHỤ LỤC DATA (CHUẨN FORM A4 + LOGO 960x540)
+        // =====================================================================
         async function downloadCertificatePDF(btnElement) {
             const originalText = btnElement.innerHTML;
             btnElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẠO PDF...`;
@@ -533,18 +536,15 @@
                             
                             <!-- Watermark Logo Chìm -->
                             <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.04; pointer-events: none; z-index: 0;">
-                                <img src="./logo.png" style="width: 500px;">
+                                <img src="./logo.png" style="width: 550px; height: auto;">
                             </div>
 
-                            <!-- Khung viền kép chống lệch -->
+                            <!-- Khung viền kép -->
                             <div style="position: relative; z-index: 1; border: 3px solid #003882; padding: 4px; height: 100%; box-sizing: border-box;">
-                                <div style="border: 1px solid #1ea6d9; padding: 40px; text-align: center; height: 100%; box-sizing: border-box; background: linear-gradient(to bottom, #ffffff, #f4f9ff); display: flex; flex-direction: column; align-items: center;">
+                                <div style="border: 1px solid #1ea6d9; padding: 50px 40px; text-align: center; height: 100%; box-sizing: border-box; background: linear-gradient(to bottom, #ffffff, #f4f9ff); display: flex; flex-direction: column; align-items: center;">
                                     
-                                    <!-- XỬ LÝ CROP LOGO 600x600 BẰNG CSS ĐỂ LOẠI BỎ KHOẢNG TRẮNG -->
-                                    <div style="height: 100px; width: 100%; overflow: hidden; display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
-                                        <!-- Sử dụng transform: scale để phóng to logo bên trong div bị cắt -->
-                                        <img src="./logo.png" style="width: 320px; height: auto; transform: scale(1.6);">
-                                    </div>
+                                    <!-- LOGO CHÍNH DIỆN: Sử dụng tỷ lệ gốc 960x540 -->
+                                    <img src="./logo.png" style="width: 320px; height: auto; margin-bottom: 20px; display: block;">
                                     
                                     <!-- Tiêu đề chứng thư -->
                                     <h1 style="font-size: 34px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 10px 0 5px 0; letter-spacing: 1px;">CHỨNG THƯ CHẤT LƯỢNG NƯỚC</h1>
@@ -568,7 +568,7 @@
                                     </div>
                                     
                                     <!-- Footer Note đẩy xuống đáy -->
-                                    <div style="margin-top: auto; padding-bottom: 20px;">
+                                    <div style="margin-top: auto; padding-bottom: 10px;">
                                         <p style="font-size: 13px; font-style: italic; color: #64748b; line-height: 1.6; margin: 0 30px;">
                                             Chứng thư được cấp tự động bởi Hệ thống Quan trắc Nông nghiệp thông minh <strong>WioT AquaSense</strong>.<br>
                                             Dữ liệu được mã hóa điện tử vô thời hạn, không thể chỉnh sửa hay làm giả.
@@ -589,10 +589,8 @@
                                     <p style="font-size: 13px; color: #64748b; margin: 6px 0 0 0;">Trích xuất ${data.history.length} bản ghi gần nhất. Đo tự động bằng hệ thống cảm biến chuẩn công nghiệp.</p>
                                 </div>
                                 
-                                <!-- Logo phụ lục cũng được crop bằng CSS -->
-                                <div style="width: 120px; height: 50px; overflow: hidden; display: flex; justify-content: flex-end; align-items: center;">
-                                    <img src="./logo.png" style="width: 160px; height: auto; transform: scale(1.4); transform-origin: right center;">
-                                </div>
+                                <!-- Logo phụ lục nhỏ nhắn, chuyên nghiệp -->
+                                <img src="./logo.png" style="width: 140px; height: auto;">
                             </div>
                             
                             <table style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px #e2e8f0;">
@@ -613,26 +611,32 @@
                     </div>
                 `;
 
-                // Render khung nháp ẩn
+                // 3. XỬ LÝ KHUNG NHÁP TRÁNH BỊ LỆCH (FIX POSITION)
                 const container = document.createElement('div');
                 container.innerHTML = pdfHTML;
-                container.style.position = 'absolute';
-                container.style.top = '-9999px';
+                
+                // Thay vì dùng absolute, dùng fixed để ghim cứng toạ độ chụp, tránh thanh cuộn làm lệch trái
+                container.style.position = 'fixed'; 
+                container.style.top = '0';
                 container.style.left = '0';
+                container.style.width = '794px';
+                container.style.zIndex = '-9999';
+                container.style.backgroundColor = 'white';
                 document.body.appendChild(container);
 
-                // =====================================================================
-                // 3. CẤU HÌNH IN A4 ÉP CỨNG THEO PIXEL CHỐNG LỆCH KHUNG
-                // =====================================================================
+                // 4. CẤU HÌNH IN A4 VÀ XUẤT FILE
                 const opt = {
-                    margin:       0, // Bỏ margin ngoài để HTML chiếm trọn canvas 794px
+                    margin:       0, 
                     filename:     `WioT_ChungThu_Ao${activePond}_${DEVICE_ID}.pdf`,
                     image:        { type: 'jpeg', quality: 1.0 },
-                    html2canvas:  { scale: 2, useCORS: true, windowWidth: 794 }, // Khóa cứng chiều rộng khung chụp
-                    jsPDF:        { unit: 'px', format: [794, 1123], orientation: 'portrait' } // Fix cứng size giấy A4 bằng Pixel
+                    // Cố định toạ độ chụp x: 0, y: 0 để đảm bảo viền 2 bên đều nhau tuyệt đối
+                    html2canvas:  { scale: 2, useCORS: true, windowWidth: 794, width: 794, x: 0, y: 0, scrollX: 0, scrollY: 0 }, 
+                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' } 
                 };
 
                 await html2pdf().set(opt).from(container.querySelector('#print-wrapper')).save();
+                
+                // Dọn dẹp DOM
                 document.body.removeChild(container);
 
             } catch (error) {
