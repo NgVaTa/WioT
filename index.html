@@ -493,11 +493,11 @@
         }
 
         // =====================================================================
-        // TỰ ĐỘNG XUẤT CHỨNG THƯ PDF + PHỤ LỤC DATA
+        // TỰ ĐỘNG XUẤT CHỨNG THƯ PDF + PHỤ LỤC DATA (ĐÃ FIX KHUNG A4 VÀ LOGO)
         // =====================================================================
         async function downloadCertificatePDF(btnElement) {
             const originalText = btnElement.innerHTML;
-            btnElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ĐANG XỬ LÝ DỮ LIỆU...`;
+            btnElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẠO PDF...`;
             btnElement.disabled = true;
 
             try {
@@ -505,18 +505,12 @@
                 const response = await fetch(url);
                 const data = await response.json();
 
-                // IN DỮ LIỆU RA CONSOLE ĐỂ BẮT BỆNH NẾU CÓ LỖI
-                console.log("Dữ liệu Passport trả về:", data);
-
                 if (data.status !== "SUCCESS" || !data.history || data.history.length === 0) {
-                    // Hiển thị lý do lỗi chi tiết lên màn hình
                     alert(`Không thể xuất chứng thư!\n\nChi tiết lỗi từ Server:\nTrạng thái: ${data.status}\nThiết bị: ${DEVICE_ID}\nAo số: ${activePond}\nBản ghi tìm thấy: ${data.history ? data.history.length : 0}`);
                     return;
                 }
 
-                // =====================================================================
-                // 1. RENDER BẢNG DỮ LIỆU ĐƯỢC PHỐI MÀU CHUYÊN NGHIỆP
-                // =====================================================================
+                // 1. RENDER BẢNG DỮ LIỆU
                 const tableRows = data.history.map((row, index) => `
                     <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f8fafc'}; border-bottom: 1px solid #e2e8f0;">
                         <td style="padding: 12px; text-align: center; font-size: 13px; color: #475569;">${row.timestamp}</td>
@@ -530,50 +524,56 @@
                 const wqiColor = data.wqi_score >= 70 ? '#10b981' : '#f59e0b';
                 const wqiText = data.wqi_score >= 70 ? 'ĐẠT CHUẨN XUẤT KHẨU' : 'CẦN CẢI THIỆN MÔI TRƯỜNG';
 
-                // =====================================================================
-                // TEMPLATE HTML CHUẨN KHỔ GIẤY A4 (794px) VỚI LOGO THƯƠNG HIỆU
-                // =====================================================================
+                // 2. TEMPLATE HTML CHUẨN KHỔ GIẤY A4 (794px x 1123px)
                 const pdfHTML = `
-                    <div id="print-wrapper" style="width: 794px; box-sizing: border-box; padding: 20px; font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; background: white; margin: 0 auto; position: relative;">
+                    <div id="print-wrapper" style="width: 794px; background: white; margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif;">
                         
-                        <!-- Watermark Logo Chìm -->
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; pointer-events: none; z-index: 0; text-align: center;">
-                            <img src="./logo.png" style="width: 350px; max-height: 350px; object-fit: contain;">
-                        </div>
+                        <!-- TRANG 1: MẶT TRƯỚC (Ép cứng chiều cao chuẩn A4) -->
+                        <div style="width: 794px; height: 1123px; padding: 40px; box-sizing: border-box; position: relative;">
+                            
+                            <!-- Watermark Logo Chìm -->
+                            <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.04; pointer-events: none; z-index: 0;">
+                                <img src="./logo.png" style="width: 500px;">
+                            </div>
 
-                        <!-- TRANG 1: MẶT TRƯỚC CHỨNG THƯ -->
-                        <div style="position: relative; z-index: 1; border: 3px solid #003882; padding: 4px; height: 1040px; box-sizing: border-box;">
-                            <div style="border: 1px solid #1ea6d9; padding: 60px 40px; text-align: center; height: 100%; box-sizing: border-box; background: linear-gradient(to bottom, #ffffff, #f4f9ff); position: relative;">
-                                
-                                <!-- Header Logo Thương Hiệu -->
-                                <img src="./logo.png" style="height: 75px; max-width: 300px; object-fit: contain; margin: 0 auto 25px auto; display: block;">
-                                
-                                <!-- Tiêu đề chứng thư -->
-                                <h1 style="font-size: 32px; font-weight: 900; color: #003882; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px;">CHỨNG THƯ CHẤT LƯỢNG NƯỚC THỦY SẢN</h1>
-                                <p style="font-size: 14px; color: #1ea6d9; font-weight: bold; letter-spacing: 2px; text-transform: uppercase;">Water Quality Certificate</p>
-                                
-                                <hr style="width: 80px; border: 2px solid #1ea6d9; margin: 30px auto;">
-                                
-                                <!-- Thông tin trích xuất -->
-                                <p style="font-size: 18px; color: #334155; margin: 15px 0;">Mã thiết bị giám sát: <span style="font-weight: bold; color: #003882;">${DEVICE_ID}</span></p>
-                                <p style="font-size: 18px; color: #334155; margin: 15px 0;">Khu vực quan trắc: <span style="font-weight: bold; color: #003882;">AO NUÔI ${activePond}</span></p>
-                                <p style="font-size: 15px; color: #64748b; margin: 15px 0;">Ngày trích xuất: <span style="font-weight: bold;">${new Date().toLocaleDateString('vi-VN')}</span></p>
-                                
-                                <!-- Block Điểm WQI -->
-                                <div style="margin: 50px auto; padding: 40px 30px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 56, 130, 0.08); width: 65%; border-top: 5px solid #1ea6d9; box-sizing: border-box;">
-                                    <p style="font-size: 15px; font-weight: bold; color: #64748b; margin-bottom: 20px;">CHỈ SỐ CHẤT LƯỢNG NƯỚC TỔNG HỢP (WQI)</p>
-                                    <p style="font-size: 80px; font-weight: 900; color: #003882; margin: 0; line-height: 1;">${data.wqi_score} <span style="font-size: 28px; color: #94a3b8;">/ 100</span></p>
-                                    <div style="display: inline-block; background: ${wqiColor}; color: white; padding: 12px 28px; border-radius: 50px; font-weight: bold; font-size: 16px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1px;">
-                                        ${wqiText}
+                            <!-- Khung viền kép chống lệch -->
+                            <div style="position: relative; z-index: 1; border: 3px solid #003882; padding: 4px; height: 100%; box-sizing: border-box;">
+                                <div style="border: 1px solid #1ea6d9; padding: 40px; text-align: center; height: 100%; box-sizing: border-box; background: linear-gradient(to bottom, #ffffff, #f4f9ff); display: flex; flex-direction: column; align-items: center;">
+                                    
+                                    <!-- XỬ LÝ CROP LOGO 600x600 BẰNG CSS ĐỂ LOẠI BỎ KHOẢNG TRẮNG -->
+                                    <div style="height: 100px; width: 100%; overflow: hidden; display: flex; justify-content: center; align-items: center; margin-bottom: 20px;">
+                                        <!-- Sử dụng transform: scale để phóng to logo bên trong div bị cắt -->
+                                        <img src="./logo.png" style="width: 320px; height: auto; transform: scale(1.6);">
                                     </div>
-                                </div>
-                                
-                                <!-- Footer Note -->
-                                <div style="position: absolute; bottom: 50px; left: 0; right: 0;">
-                                    <p style="font-size: 13px; font-style: italic; color: #64748b; line-height: 1.6; margin: 0 50px;">
-                                        Chứng thư được cấp tự động bởi Hệ thống Quan trắc Nông nghiệp thông minh <strong>WioT AquaSense</strong>.<br>
-                                        Dữ liệu được mã hóa điện tử vô thời hạn, không thể chỉnh sửa hay làm giả.
-                                    </p>
+                                    
+                                    <!-- Tiêu đề chứng thư -->
+                                    <h1 style="font-size: 34px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 10px 0 5px 0; letter-spacing: 1px;">CHỨNG THƯ CHẤT LƯỢNG NƯỚC</h1>
+                                    <h2 style="font-size: 26px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 0 0 5px 0; letter-spacing: 1px;">THỦY SẢN</h2>
+                                    <p style="font-size: 14px; color: #1ea6d9; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin-top: 5px;">Water Quality Certificate</p>
+                                    
+                                    <hr style="width: 100px; border: 2px solid #1ea6d9; margin: 30px auto;">
+                                    
+                                    <!-- Thông tin trích xuất -->
+                                    <p style="font-size: 18px; color: #334155; margin: 15px 0;">Mã thiết bị giám sát: <span style="font-weight: bold; color: #003882;">${DEVICE_ID}</span></p>
+                                    <p style="font-size: 18px; color: #334155; margin: 15px 0;">Khu vực quan trắc: <span style="font-weight: bold; color: #003882;">AO NUÔI ${activePond}</span></p>
+                                    <p style="font-size: 15px; color: #64748b; margin: 15px 0;">Ngày trích xuất: <span style="font-weight: bold;">${new Date().toLocaleDateString('vi-VN')}</span></p>
+                                    
+                                    <!-- Block Điểm WQI -->
+                                    <div style="margin: 40px auto; padding: 40px 30px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 56, 130, 0.08); width: 70%; border-top: 5px solid #1ea6d9; box-sizing: border-box;">
+                                        <p style="font-size: 15px; font-weight: bold; color: #64748b; margin-bottom: 20px;">CHỈ SỐ CHẤT LƯỢNG NƯỚC TỔNG HỢP (WQI)</p>
+                                        <p style="font-size: 80px; font-weight: 900; color: #003882; margin: 0; line-height: 1;">${data.wqi_score} <span style="font-size: 28px; color: #94a3b8;">/ 100</span></p>
+                                        <div style="display: inline-block; background: ${wqiColor}; color: white; padding: 12px 28px; border-radius: 50px; font-weight: bold; font-size: 16px; margin-top: 30px; text-transform: uppercase; letter-spacing: 1px;">
+                                            ${wqiText}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Footer Note đẩy xuống đáy -->
+                                    <div style="margin-top: auto; padding-bottom: 20px;">
+                                        <p style="font-size: 13px; font-style: italic; color: #64748b; line-height: 1.6; margin: 0 30px;">
+                                            Chứng thư được cấp tự động bởi Hệ thống Quan trắc Nông nghiệp thông minh <strong>WioT AquaSense</strong>.<br>
+                                            Dữ liệu được mã hóa điện tử vô thời hạn, không thể chỉnh sửa hay làm giả.
+                                        </p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -582,13 +582,17 @@
                         <div class="html2pdf__page-break"></div>
 
                         <!-- TRANG 2: PHỤ LỤC DATA LOGS -->
-                        <div style="padding-top: 20px; box-sizing: border-box;">
+                        <div style="width: 794px; padding: 40px; box-sizing: border-box;">
                             <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #003882; padding-bottom: 15px; margin-bottom: 25px;">
                                 <div>
                                     <h2 style="font-size: 22px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 0;">PHỤ LỤC: NHẬT KÝ QUAN TRẮC MÔI TRƯỜNG</h2>
                                     <p style="font-size: 13px; color: #64748b; margin: 6px 0 0 0;">Trích xuất ${data.history.length} bản ghi gần nhất. Đo tự động bằng hệ thống cảm biến chuẩn công nghiệp.</p>
                                 </div>
-                                <img src="./logo.png" style="height: 40px; object-fit: contain;">
+                                
+                                <!-- Logo phụ lục cũng được crop bằng CSS -->
+                                <div style="width: 120px; height: 50px; overflow: hidden; display: flex; justify-content: flex-end; align-items: center;">
+                                    <img src="./logo.png" style="width: 160px; height: auto; transform: scale(1.4); transform-origin: right center;">
+                                </div>
                             </div>
                             
                             <table style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px #e2e8f0;">
@@ -615,23 +619,20 @@
                 container.style.position = 'absolute';
                 container.style.top = '-9999px';
                 container.style.left = '0';
-                // Ép cứng độ rộng 794px để html2canvas chụp đúng khung hình A4
-                container.style.width = '794px'; 
                 document.body.appendChild(container);
 
-                // Cấu hình chất lượng và định dạng PDF
+                // =====================================================================
+                // 3. CẤU HÌNH IN A4 ÉP CỨNG THEO PIXEL CHỐNG LỆCH KHUNG
+                // =====================================================================
                 const opt = {
-                    margin:       [10, 0, 10, 0], // Canh lề trên/dưới 10mm, lề trái/phải = 0 (để CSS tự cân bằng)
+                    margin:       0, // Bỏ margin ngoài để HTML chiếm trọn canvas 794px
                     filename:     `WioT_ChungThu_Ao${activePond}_${DEVICE_ID}.pdf`,
                     image:        { type: 'jpeg', quality: 1.0 },
-                    html2canvas:  { scale: 2, useCORS: true, windowWidth: 794 }, // Khoá Width chụp màn hình
-                    jsPDF:        { unit: 'mm', format: 'a4', orientation: 'portrait' }
+                    html2canvas:  { scale: 2, useCORS: true, windowWidth: 794 }, // Khóa cứng chiều rộng khung chụp
+                    jsPDF:        { unit: 'px', format: [794, 1123], orientation: 'portrait' } // Fix cứng size giấy A4 bằng Pixel
                 };
 
-                // Tiến hành xuất PDF và Tải về
                 await html2pdf().set(opt).from(container.querySelector('#print-wrapper')).save();
-                
-                // Dọn dẹp DOM
                 document.body.removeChild(container);
 
             } catch (error) {
