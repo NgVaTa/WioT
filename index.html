@@ -496,21 +496,25 @@
         // TỰ ĐỘNG XUẤT CHỨNG THƯ PDF + PHỤ LỤC DATA
         // =====================================================================
         async function downloadCertificatePDF(btnElement) {
-            // Hiệu ứng Loading cho nút bấm
             const originalText = btnElement.innerHTML;
-            btnElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẠO PDF...`;
+            btnElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ĐANG XỬ LÝ DỮ LIỆU...`;
             btnElement.disabled = true;
 
             try {
-                // Gọi API lấy toàn bộ dữ liệu lịch sử của Ao hiện tại
                 const url = `${PROXY_URL}?action=get_passport&device_id=${DEVICE_ID}&pond=${activePond}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
+                // IN DỮ LIỆU RA CONSOLE ĐỂ BẮT BỆNH NẾU CÓ LỖI
+                console.log("Dữ liệu Passport trả về:", data);
+
                 if (data.status !== "SUCCESS" || !data.history || data.history.length === 0) {
-                    alert("Chưa đủ dữ liệu quan trắc để xuất chứng thư!");
+                    // Hiển thị lý do lỗi chi tiết lên màn hình
+                    alert(`Không thể xuất chứng thư!\n\nChi tiết lỗi từ Server:\nTrạng thái: ${data.status}\nThiết bị: ${DEVICE_ID}\nAo số: ${activePond}\nBản ghi tìm thấy: ${data.history ? data.history.length : 0}`);
                     return;
                 }
+
+                // ... (GIỮ NGUYÊN PHẦN CODE VẼ BẢNG TABLE VÀ HTML2PDF BÊN DƯỚI CỦA BẠN) ...
 
                 // Render các dòng dữ liệu vào thẻ TR (Table Row)
                 const tableRows = data.history.map((row, index) => `
