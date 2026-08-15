@@ -472,25 +472,54 @@
         }
 
         function generateQRCode() {
-            const qrContainer = document.getElementById("qrcode");
-            qrContainer.innerHTML = "";
-            
-            new QRCode(qrContainer, {
-                text: `https://aquasense.vn/passport?device=${DEVICE_ID}&pond=${activePond}`,
-                width: 140,
-                height: 140,
-                colorDark : "#0f172a",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H
-            });
+          const qrContainer = document.getElementById("qrcode");
+          qrContainer.innerHTML = "";
+          
+          // Link QR chứa cả device_id và activePond hiện tại
+          const passportURL = `${window.location.origin}${window.location.pathname}?device=${DEVICE_ID}&pond=${activePond}&tab=passport`;
+          
+          new QRCode(qrContainer, {
+            text: passportURL,
+            width: 150,
+            height: 150,
+            colorDark : "#0f172a",
+            colorLight : "#ffffff",
+            correctLevel : QRCode.CorrectLevel.H
+          });
         }
 
-        setInterval(fetchTelemetryData, 5000);
-        window.onload = () => {
+        setInterval(fetchTelemetryData, 3000);
+        // =====================================================================
+        // B. KHỞI TẠO WEB APP & ĐỌC THAM SỐ URL TỪ MÃ QR KHI QUÉT
+        // =====================================================================
+        window.addEventListener('DOMContentLoaded', () => {
+            // 1. Cập nhật Device ID lên Header
             document.getElementById('header-device-id').innerText = DEVICE_ID;
-            changeActivePond("1");
+
+            // 2. Bắt tham số từ đường link URL (nếu khách hàng quét mã QR)
+            const urlParams = new URLSearchParams(window.location.search);
+            const pondParam = urlParams.get('pond');
+            const tabParam = urlParams.get('tab');
+
+            // 3. Xử lý logic chọn Ao nuôi (Pond)
+            if (pondParam) {
+                // Nếu có tham số ao từ mã QR, tự động chọn ao đó
+                document.getElementById('pond-select').value = pondParam;
+                changeActivePond(pondParam);
+            } else {
+                // Nếu truy cập bình thường không qua quét QR, mặc định chọn Ao 1
+                changeActivePond("1");
+            }
+
+            // 4. Xử lý logic chuyển Tab giao diện
+            if (tabParam === 'passport') {
+                // Đẩy thẳng người dùng sang màn hình Hộ chiếu số
+                switchTab('passport');
+            }
+
+            // 5. Kích hoạt lấy dữ liệu cảm biến ngay lập tức
             fetchTelemetryData();
-        };
+        });
     </script>
 </body>
 </html>
