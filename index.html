@@ -17,12 +17,15 @@
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://cdn-icons-png.flaticon.com/512/3135/3135715.png">
-    
+
     <!-- CDNs -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-
+    
+    <!-- BỔ SUNG THƯ VIỆN XUẤT PDF CHUYÊN NGHIỆP -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    
     <style>
         body { 
             -webkit-tap-highlight-color: transparent; 
@@ -34,6 +37,7 @@
             font-weight: 700; 
         }
     </style>
+    
 </head>
 <body class="bg-slate-100 text-slate-800 pb-24 select-none">
 
@@ -266,7 +270,7 @@
                     <span class="text-xs bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-lg">ĐẠT CHUẨN XUẤT KHẨU</span>
                 </div>
 
-                <button onclick="window.print()" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl transition shadow flex items-center justify-center gap-2">
+                <button onclick="downloadCertificatePDF(this)" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl transition shadow flex items-center justify-center gap-2">
                     <i class="fa-solid fa-file-pdf"></i> TẢI CHỨNG THƯ CHẤT LƯỢNG (PDF)
                 </button>
             </div>
@@ -486,6 +490,114 @@
             colorLight : "#ffffff",
             correctLevel : QRCode.CorrectLevel.H
           });
+        }
+
+        // =====================================================================
+        // TỰ ĐỘNG XUẤT CHỨNG THƯ PDF + PHỤ LỤC DATA
+        // =====================================================================
+        async function downloadCertificatePDF(btnElement) {
+            // Hiệu ứng Loading cho nút bấm
+            const originalText = btnElement.innerHTML;
+            btnElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẠO PDF...`;
+            btnElement.disabled = true;
+
+            try {
+                // Gọi API lấy toàn bộ dữ liệu lịch sử của Ao hiện tại
+                const url = `${PROXY_URL}?action=get_passport&device_id=${DEVICE_ID}&pond=${activePond}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.status !== "SUCCESS" || !data.history || data.history.length === 0) {
+                    alert("Chưa đủ dữ liệu quan trắc để xuất chứng thư!");
+                    return;
+                }
+
+                // Render các dòng dữ liệu vào thẻ TR (Table Row)
+                const tableRows = data.history.map((row, index) => `
+                    <tr class="${index % 2 === 0 ? 'bg-white' : 'bg-slate-50'} border-b">
+                        <td style="padding: 8px; text-align: center; font-size: 12px; color: #475569;">${row.timestamp}</td>
+                        <td style="padding: 8px; text-align: center; font-size: 12px; font-weight: bold; color: #0284c7;">${row.ph}</td>
+                        <td style="padding: 8px; text-align: center; font-size: 12px; font-weight: bold; color: #d97706;">${row.ec}</td>
+                        <td style="padding: 8px; text-align: center; font-size: 12px; font-weight: bold; color: #9333ea;">${row.orp}</td>
+                        <td style="padding: 8px; text-align: center; font-size: 12px; font-weight: bold; color: #e11d48;">${row.temp}</td>
+                    </tr>
+                `).join('');
+
+                // Bản mẫu Template HTML cho file PDF
+                const pdfHTML = `
+                    <div id="print-wrapper" style="width: 800px; padding: 40px; font-family: sans-serif; color: #1e293b; background: white;">
+                        
+                        <!-- TRANG 1: CHỨNG THƯ MẶT TRƯỚC -->
+                        <div style="text-align: center; border: 4px solid #10b981; border-radius: 16px; padding: 40px; margin-bottom: 20px;">
+                            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" width="60" style="margin: 0 auto 10px auto;">
+                            <h1 style="font-size: 28px; font-weight: 900; color: #059669; text-transform: uppercase; margin-bottom: 10px;">CHỨNG THƯ CHẤT LƯỢNG NƯỚC THỦY SẢN</h1>
+                            <p style="font-size: 18px; font-weight: bold; color: #475569; margin: 5px 0;">Mã thiết bị giám sát: <span style="color: #0284c7;">${DEVICE_ID}</span></p>
+                            <p style="font-size: 18px; font-weight: bold; color: #475569; margin: 5px 0;">Khu vực quan trắc: <span style="color: #0284c7;">AO NUÔI ${activePond}</span></p>
+                            
+                            <div style="margin: 40px 0; padding: 20px; background: #f8fafc; border-radius: 12px;">
+                                <p style="font-size: 14px; font-weight: bold; color: #64748b; margin-bottom: 10px;">CHỈ SỐ CHẤT LƯỢNG NƯỚC TỔNG HỢP (WQI)</p>
+                                <p style="font-size: 64px; font-weight: 900; color: #10b981; margin: 0;">${data.wqi_score} <span style="font-size: 24px; color: #94a3b8;">/ 100</span></p>
+                                <div style="display: inline-block; background: #10b981; color: white; padding: 8px 16px; border-radius: 8px; font-weight: bold; font-size: 18px; margin-top: 15px;">ĐẠT CHUẨN XUẤT KHẨU</div>
+                            </div>
+                            <p style="font-size: 13px; font-style: italic; color: #94a3b8;">Cấp bởi hệ thống quan trắc IoT WioT AquaSense. Dữ liệu được mã hóa và không thể làm giả.</p>
+                        </div>
+
+                        <!-- NGẮT TRANG PDF (Tạo trang 2) -->
+                        <div class="html2pdf__page-break"></div>
+
+                        <!-- TRANG 2: PHỤ LỤC DATA LOGS -->
+                        <div style="padding-top: 20px;">
+                            <h2 style="font-size: 20px; font-weight: 900; color: #0f172a; text-transform: uppercase; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px; margin-bottom: 5px;">Phụ lục: Nhật ký quan trắc môi trường</h2>
+                            <p style="font-size: 13px; color: #64748b; margin-bottom: 20px;">Trích xuất ${data.history.length} bản ghi gần nhất. Dữ liệu được đo tự động và truyền trực tiếp từ đầm nuôi.</p>
+                            
+                            <table style="width: 100%; border-collapse: collapse;">
+                                <thead>
+                                    <tr style="background: #e2e8f0; border-bottom: 2px solid #cbd5e1;">
+                                        <th style="padding: 10px; text-align: center; font-size: 13px; font-weight: 900; color: #334155;">Thời gian quét</th>
+                                        <th style="padding: 10px; text-align: center; font-size: 13px; font-weight: 900; color: #334155;">Độ pH</th>
+                                        <th style="padding: 10px; text-align: center; font-size: 13px; font-weight: 900; color: #334155;">Độ mặn EC (ppt)</th>
+                                        <th style="padding: 10px; text-align: center; font-size: 13px; font-weight: 900; color: #334155;">Chỉ số ORP (mV)</th>
+                                        <th style="padding: 10px; text-align: center; font-size: 13px; font-weight: 900; color: #334155;">Nhiệt độ (°C)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                `;
+
+                // Render khung nháp ẩn ngoài màn hình để thư viện chụp ảnh PDF
+                const container = document.createElement('div');
+                container.innerHTML = pdfHTML;
+                container.style.position = 'absolute';
+                container.style.top = '-9999px';
+                document.body.appendChild(container);
+
+                // Cấu hình chất lượng và định dạng PDF
+                const opt = {
+                    margin:       [0.3, 0.3, 0.3, 0.3], // inch
+                    filename:     `WioT_ChungThu_Ao${activePond}_${DEVICE_ID}.pdf`,
+                    image:        { type: 'jpeg', quality: 1.0 },
+                    html2canvas:  { scale: 2, useCORS: true },
+                    jsPDF:        { unit: 'in', format: 'a4', orientation: 'portrait' }
+                };
+
+                // Tiến hành xuất PDF và Tải về thiết bị
+                await html2pdf().set(opt).from(container.querySelector('#print-wrapper')).save();
+                
+                // Dọn dẹp DOM
+                document.body.removeChild(container);
+
+            } catch (error) {
+                alert("Đã xảy ra lỗi khi tạo chứng thư. Vui lòng thử lại!");
+                console.error(error);
+            } finally {
+                // Phục hồi lại nút bấm
+                btnElement.innerHTML = originalText;
+                btnElement.disabled = false;
+            }
         }
 
         setInterval(fetchTelemetryData, 3000);
