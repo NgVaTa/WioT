@@ -320,7 +320,7 @@
         
             <div class="grid grid-cols-2 gap-4 text-xs mb-4">
                 <div>
-                    <p><strong>Mã thiết bị:</strong> <span id="pdf-device-id" class="font-mono font-bold">AQS-88902A34</span></p>
+                    <p><strong>Mã thiết bị:</strong> <span id="pdf-device-id" class="font-mono font-bold">{DEVICE_ID}</span></p>
                     <p><strong>Cơ sở nuôi:</strong> Đầm tôm sinh thái Cà Mau</p>
                     <p><strong>Khu vực chứng nhận:</strong> <span id="pdf-pond-name" class="font-bold text-sky-800">AO NUÔI 1</span></p>
                 </div>
@@ -512,7 +512,7 @@
         }
 
         function send1WayCommand(relayId, state) {
-            const url = `${PROXY_URL}?action=set_command&device_id=${DEVICE_ID}&relay_id=${relayId}&target_state=${state}`;
+            const url = `${PROXY_URL}?action=set_command&_id=${_ID}&relay_id=${relayId}&target_state=${state}`;
             fetch(url).catch(err => console.log("Lệnh 1 chiều đã phát:", relayId, state));
         }
 
