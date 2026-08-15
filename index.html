@@ -24,41 +24,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
     <style>
-
-        /* ĐỊNH DẠNG TRANG IN CHỨNG THƯ CHẤT LƯỢNG A4 */
-        /* NÂNG CẤP CHUẨN IN A4 CHỐNG MẤT PHỤ LỤC */
-       /* NÂNG CẤP CHUẨN IN A4: CHỐNG TRÀN TRANG VÀ HIỂN THỊ 100% PHỤ LỤC */
-        @media print {
-            /* 1. Ẩn hoàn toàn giao diện WebApp chính (Header, Navbar, Các Tab...) */
-            body > *:not(#certificate-template) {
-                display: none !important;
-            }
-            
-            /* 2. Hiển thị khung Chứng thư theo luồng tự nhiên (Không dùng absolute) */
-            #certificate-template {
-                display: block !important;
-                position: relative !important;
-                width: 100% !important;
-                margin: 0 !important;
-                padding: 0 !important;
-                background: white !important;
-                color: #0f172a !important;
-            }
-            
-            /* 3. Ép ngắt trang bắt buộc cho phần Phụ lục */
-            .pdf-page-break {
-                break-before: page !important;
-                page-break-before: always !important;
-                padding-top: 20px !important;
-            }
-            
-            /* 4. Khai báo khổ giấy A4 chuẩn */
-            @page {
-                size: A4 portrait;
-                margin: 15mm;
-            }
-        }
-        
         body { 
             -webkit-tap-highlight-color: transparent; 
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
@@ -280,7 +245,6 @@
         </section>
 
         <!-- TAB 3: HỘ CHIẾU SỐ THỦY SẢN -->
-       <!-- TAB 3: HỘ CHIẾU SỐ THỦY SẢN & PHỤ LỤC NHẬT KÝ -->
         <section id="tab-passport" class="tab-content space-y-4 hidden">
             <div class="bg-white rounded-2xl p-5 shadow-md border border-slate-200 text-center space-y-4">
                 <div class="border-b pb-3">
@@ -288,13 +252,12 @@
                     <h2 class="text-lg font-black text-slate-800 mt-2">HỘ CHIẾU SỐ THỦY SẢN</h2>
                     <p class="text-xs text-slate-500">Đầm tôm Cà Mau - <span id="passport-pond-name" class="font-black text-sky-700">AO NUÔI 1</span></p>
                 </div>
-        
-                <!-- MÃ QR MÃ HÓA CHỨNG THƯ VÀ PHỤ LỤC -->
+
                 <div class="flex justify-center my-2">
                     <div id="qrcode" class="p-3 bg-white border-2 border-dashed border-slate-300 rounded-xl"></div>
                 </div>
-                <p class="text-[11px] text-slate-400">Mã QR chứa link xác thực Chứng thư số & Phụ lục dữ liệu gốc</p>
-        
+                <p class="text-[11px] text-slate-400">Quét mã QR để truy xuất nhật ký cảm biến 90 ngày của ao nuôi này</p>
+
                 <div class="bg-slate-50 p-3 rounded-xl flex justify-between items-center text-left">
                     <div>
                         <p class="text-[10px] text-slate-400 font-bold uppercase">Chỉ Số Chất Lượng Nước WQI</p>
@@ -302,67 +265,13 @@
                     </div>
                     <span class="text-xs bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-lg">ĐẠT CHUẨN XUẤT KHẨU</span>
                 </div>
-        
-                <button onclick="exportQualityPDF()" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl transition shadow flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-file-pdf"></i> TẢI CHỨNG THƯ SỐ & PHỤ LỤC (PDF)
+
+                <button onclick="window.print()" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl transition shadow flex items-center justify-center gap-2">
+                    <i class="fa-solid fa-file-pdf"></i> TẢI CHỨNG THƯ CHẤT LƯỢNG (PDF)
                 </button>
             </div>
         </section>
-        
-        <!-- KHUNG IN A4: CHỨNG THƯ SỐ + PHỤ LỤC DỮ LIỆU ĐO (CHỈ HIỆN KHI XUẤT PDF) -->
-        <div id="certificate-template" class="hidden print:block border-8 border-double border-sky-900 p-6 bg-white text-slate-900">
-            <!-- TRANG 1: CHỨNG THƯ CHẤT LƯỢNG -->
-            <div class="text-center border-b-2 border-sky-900 pb-4 mb-4">
-                <p class="text-[10px] font-bold text-slate-500 uppercase tracking-widest">HỆ THỐNG GIÁM SÁT THỦY SẢN THÔNG MINH WIOT AQUASENSE</p>
-                <h1 class="text-2xl font-black text-sky-950 mt-1 uppercase">CHỨNG THƯ CHẤT LƯỢNG MÔI TRƯỜNG NƯỚC</h1>
-                <p class="text-xs text-slate-500 italic">Mã chứng thư: <span id="pdf-cert-id" class="font-mono font-bold text-slate-800">CERT-AQS-2026-P1</span></p>
-            </div>
-        
-            <div class="grid grid-cols-2 gap-4 text-xs mb-4">
-                <div>
-                    <p><strong>Mã thiết bị:</strong> <span id="pdf-device-id" class="font-mono font-bold">{DEVICE_ID}</span></p>
-                    <p><strong>Cơ sở nuôi:</strong> Đầm tôm sinh thái Cà Mau</p>
-                    <p><strong>Khu vực chứng nhận:</strong> <span id="pdf-pond-name" class="font-bold text-sky-800">AO NUÔI 1</span></p>
-                </div>
-                <div class="text-right">
-                    <p><strong>Thời gian cấp:</strong> <span id="pdf-export-time">15/08/2026 16:30</span></p>
-                    <p><strong>Nguồn dữ liệu:</strong> Google Sheets Immutability Storage</p>
-                    <p><strong>Trạng thái:</strong> <span class="text-emerald-700 font-bold">XÁC THỰC THỜI GIAN THỰC</span></p>
-                </div>
-            </div>
-        
-            <div class="flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-slate-200 mb-6">
-                <div>
-                    <p class="text-xs text-slate-500 font-bold uppercase">Đánh giá chung WQI</p>
-                    <p class="text-xl font-black text-emerald-600"><span id="pdf-wqi">95</span> / 100 <span class="text-xs font-normal text-slate-600">(Hạng A+ Đạt chuẩn xuất khẩu)</span></p>
-                </div>
-                <div id="pdf-qrcode" class="p-1 bg-white border border-slate-300"></div>
-            </div>
-        
-            <!-- TRANG 2: PHỤ LỤC NHẬT KÝ ĐO (TỰ ĐỘNG TÁCH TRANG KHI IN PDF) -->
-            <div class="pdf-page-break pt-4">
-                <div class="border-b-2 border-sky-900 pb-2 mb-3 flex justify-between items-center">
-                    <h3 class="font-black text-xs uppercase text-sky-950">PHỤ LỤC: NHẬT KÝ NGUYÊN BẢN CẢM BIẾN (TELEMETRY LOGS)</h3>
-                    <span class="text-[9px] font-mono text-slate-500">Google Sheets Immutability Verified</span>
-                </div>
-                
-                <table class="w-full text-[10px] text-left border-collapse border border-slate-300">
-                    <thead>
-                        <tr class="bg-sky-900 text-white">
-                            <th class="p-1.5 border border-slate-300 text-center w-10">STT</th>
-                            <th class="p-1.5 border border-slate-300">Thời gian đo (Timestamp)</th>
-                            <th class="p-1.5 border border-slate-300 text-center">pH</th>
-                            <th class="p-1.5 border border-slate-300 text-center">EC (ppt)</th>
-                            <th class="p-1.5 border border-slate-300 text-center">ORP (mV)</th>
-                            <th class="p-1.5 border border-slate-300 text-center">Nhiệt độ (°C)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="pdf-appendix-table-body">
-                        <!-- Dữ liệu sẽ được điền tự động từ JS -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
+    </main>
 
     <!-- BOTTOM NAVIGATION TABS -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-2 z-50">
@@ -382,33 +291,6 @@
 
     <!-- LOGIC SCRIPT -->
     <script>
-
-        // HÀM CHẨN BỊ DỮ LIỆU VÀ XUẤT FILE CHỨNG THƯ PDF A4
-        // HÀM CHỜ TẢI ĐỦ DỮ LIỆU PHỤ LỤC RỒI MỚI MỞ CỬA SỔ IN/LƯU PDF
-        async function exportQualityPDF() {
-            // 1. Hiển thị thông báo trạng thái tải dữ liệu
-            const btn = event.currentTarget;
-            const originalText = btn.innerHTML;
-            btn.innerHTML = `<i class="fa-solid fa-spinner animate-spin"></i> ĐANG ĐỎ DỮ LIỆU PHỤ LỤC...`;
-            btn.disabled = true;
-        
-            try {
-                // 2. Ép hệ thống gọi API và CHỜ (await) đổ dữ liệu phụ lục vào DOM
-                await loadCertificateAndAppendix();
-                
-                // 3. Chờ 300ms để trình duyệt render xong giao diện bảng
-                await new Promise(resolve => setTimeout(resolve, 300));
-        
-                // 4. Kích hoạt lệnh in PDF
-                window.print();
-            } catch (err) {
-                alert("Chưa thể tải dữ liệu phụ lục từ Google Sheets. Vui lòng thử lại!");
-            } finally {
-                btn.innerHTML = originalText;
-                btn.disabled = false;
-            }
-        }
-        
         const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev";
 
         // TỰ ĐỘNG BẮT DEVICE_ID TỪ MÃ QR HOẶC LOCALSTORAGE (SCAN-TO-CLAIM)
@@ -512,7 +394,7 @@
         }
 
         function send1WayCommand(relayId, state) {
-            const url = `${PROXY_URL}?action=set_command&_id=${_ID}&relay_id=${relayId}&target_state=${state}`;
+            const url = `${PROXY_URL}?action=set_command&device_id=${DEVICE_ID}&relay_id=${relayId}&target_state=${state}`;
             fetch(url).catch(err => console.log("Lệnh 1 chiều đã phát:", relayId, state));
         }
 
@@ -537,39 +419,6 @@
             generateQRCode();
         }
 
-        function generateQRCode() {
-          const qrContainer = document.getElementById("qrcode");
-          qrContainer.innerHTML = "";
-          
-          // Link QR chứa cả device_id và activePond hiện tại
-          const passportURL = `${window.location.origin}${window.location.pathname}?device=${DEVICE_ID}&pond=${activePond}&tab=passport`;
-          
-          new QRCode(qrContainer, {
-            text: passportURL,
-            width: 150,
-            height: 150,
-            colorDark : "#0f172a",
-            colorLight : "#ffffff",
-            correctLevel : QRCode.CorrectLevel.H
-          });
-        }
-
-        // Tự động chuyển đến tab Hộ chiếu số và chọn đúng ao khi quét từ mã QR
-        window.addEventListener('DOMContentLoaded', () => {
-          const urlParams = new URLSearchParams(window.location.search);
-          const pondParam = urlParams.get('pond');
-          const tabParam = urlParams.get('tab');
-        
-          if (pondParam) {
-            document.getElementById('pond-select').value = pondParam;
-            changeActivePond(pondParam);
-          }
-        
-          if (tabParam === 'passport') {
-            switchTab('passport');
-          }
-        });
-
         function switchTab(tabName) {
             document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
             document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
@@ -580,83 +429,6 @@
             if (tabName === 'passport') {
                 generateQRCode();
             }
-        }
-
-        // HÀM TẠO MÃ QR VÀ ĐỔ DỮ LIỆU VÀO PHỤ LỤC CHỨNG THƯ SỐ
-
-        async function loadCertificateAndAppendix() {
-          const response = await fetch(`${PROXY_URL}?action=get_certificate&device_id=${DEVICE_ID}&pond=${activePond}`);
-          const certData = await response.json();
-        
-          if (certData.status === "SUCCESS") {
-            // 1. Cập nhật mã QR chứa đầy đủ thông số định danh và ao nuôi
-              const passportURL = `${window.location.origin}${window.location.pathname}?action=get_certificate&device=${DEVICE_ID}&pond=${activePond}`;
-              
-              const qrContainer = document.getElementById("qrcode");
-              qrContainer.innerHTML = "";
-              new QRCode(qrContainer, {
-                text: passportURL,
-                width: 140,
-                height: 140,
-                colorDark : "#0f172a",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.H            
-                // Đảm bảo có dữ liệu trong mảng
-                if (!certData.appendix || certData.appendix.length === 0) {
-                   document.getElementById('pdf-appendix-table-body').innerHTML = `<tr><td colspan="6" class="p-2 text-center text-slate-400">Chưa có dữ liệu nhật ký cho ao này</td></tr>`;
-                }
-              } else {
-                throw new Error("Không lấy được dữ liệu chứng thư"); // Ép dừng nếu lỗi
-              }
-            }
-              
-              // 2. Điền thông tin vào Phôi Chứng thư PDF A4
-              document.getElementById('pdf-cert-id').innerText = certData.cert_id;
-              document.getElementById('pdf-device-id').innerText = certData.device_id;
-              document.getElementById('pdf-wqi').innerText = certData.wqi_score;
-              document.getElementById('pdf-export-time').innerText = certData.latest.timestamp;
-        
-              // 3. Đổ bảng Phụ lục dữ liệu đo từ Google Sheets vào Chứng thư
-              const tableBody = document.getElementById('pdf-appendix-table-body');
-              tableBody.innerHTML = "";
-        
-              if (certData.appendix && certData.appendix.length > 0) {
-                certData.appendix.forEach((log, index) => {
-                  const row = `
-                    <tr class="${index % 2 === 0 ? 'bg-slate-50' : 'bg-white'} border-b border-slate-200">
-                      <td class="p-1 border border-slate-300 text-center font-bold">${index + 1}</td>
-                      <td class="p-1 border border-slate-300 font-mono">${log.timestamp}</td>
-                      <td class="p-1 border border-slate-300 text-center font-bold">${log.ph}</td>
-                      <td class="p-1 border border-slate-300 text-center">${log.ec}</td>
-                      <td class="p-1 border border-slate-300 text-center">${log.orp}</td>
-                      <td class="p-1 border border-slate-300 text-center">${log.temp}</td>
-                    </tr>
-                  `;
-                  tableBody.innerHTML += row;
-                });
-              } else {
-                tableBody.innerHTML = `<tr><td colspan="6" class="p-2 text-center text-slate-400">Chưa có dữ liệu nhật ký cho ao này</td></tr>`;
-              }
-        
-              // Tạo mã QR nhỏ trên góc phôi PDF
-              const pdfQrContainer = document.getElementById("pdf-qrcode");
-              pdfQrContainer.innerHTML = "";
-              new QRCode(pdfQrContainer, {
-                text: passportURL,
-                width: 75,
-                height: 75,
-                colorDark : "#0f172a",
-                colorLight : "#ffffff",
-                correctLevel : QRCode.CorrectLevel.M
-              });
-            }
-          } catch (err) {
-            console.log("Lỗi tải chứng thư:", err);
-          }
-        }
-        
-        function exportQualityPDF() {
-          window.print();
         }
 
         async function fetchTelemetryData() {
@@ -704,7 +476,7 @@
             qrContainer.innerHTML = "";
             
             new QRCode(qrContainer, {
-                text: `https://ngvata.github.io/WioT//passport?device=${DEVICE_ID}&pond=${activePond}`,
+                text: `https://aquasense.vn/passport?device=${DEVICE_ID}&pond=${activePond}`,
                 width: 140,
                 height: 140,
                 colorDark : "#0f172a",
@@ -713,7 +485,7 @@
             });
         }
 
-        setInterval(fetchTelemetryData, 3000);
+        setInterval(fetchTelemetryData, 5000);
         window.onload = () => {
             document.getElementById('header-device-id').innerText = DEVICE_ID;
             changeActivePond("1");
