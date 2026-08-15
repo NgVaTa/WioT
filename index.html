@@ -254,21 +254,27 @@
                 <div class="border-b pb-3">
                     <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">VERIFIED DIGITAL PASSPORT</span>
                     <h2 class="text-lg font-black text-slate-800 mt-2">HỘ CHIẾU SỐ THỦY SẢN</h2>
-                    <p class="text-xs text-slate-500">Đầm tôm Cà Mau - <span id="passport-pond-name" class="font-black text-sky-700">AO NUÔI 1</span></p>
+                   <h3 class="text-gray-800 font-bold text-lg">Đầm tôm Cà Mau - <span id="ui-passport-pond" class="text-sky-700">AO NUÔI 1</span></h3>
                 </div>
 
                 <div class="flex justify-center my-2">
                     <div id="qrcode" class="p-3 bg-white border-2 border-dashed border-slate-300 rounded-xl"></div>
                 </div>
-                <p class="text-[11px] text-slate-400">Quét mã QR để truy xuất nhật ký cảm biến 90 ngày của ao nuôi này</p>
+                <p id="ui-passport-desc" class="text-gray-400 text-xs text-center mt-2 mb-4">Quét mã QR để truy xuất nhật ký cảm biến của ao nuôi này</p>
 
-                <div class="bg-slate-50 p-3 rounded-xl flex justify-between items-center text-left">
-                    <div>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase">Chỉ Số Chất Lượng Nước WQI</p>
-                        <p class="text-lg font-black text-emerald-600"><span id="wqi-score">95</span> / 100 <span class="text-xs font-normal text-slate-500">(Grade A+)</span></p>
+                <div class="bg-gray-50 rounded-xl p-4 flex justify-between items-center mb-4">
+                <div>
+                    <p class="text-xs font-bold text-gray-400">CHỈ SỐ CHẤT LƯỢNG NƯỚC WQI</p>
+                    <div class="flex items-baseline">
+                        <span id="ui-passport-wqi" class="text-4xl font-black text-emerald-600">--</span>
+                        <span class="text-xl font-bold text-gray-400 ml-1">/ 100</span>
+                        <span id="ui-passport-grade" class="text-xs font-bold text-gray-500 ml-2"></span>
                     </div>
-                    <span class="text-xs bg-emerald-500 text-white font-bold px-2.5 py-1 rounded-lg">ĐẠT CHUẨN XUẤT KHẨU</span>
                 </div>
+                <div id="ui-passport-badge" class="bg-slate-300 text-white font-bold py-2 px-4 rounded-lg text-xs text-center w-28">
+                    ĐANG TẢI...
+                </div>
+            </div>
 
                 <button onclick="downloadCertificatePDF(this)" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl transition shadow flex items-center justify-center gap-2">
                     <i class="fa-solid fa-file-pdf"></i> TẢI CHỨNG THƯ CHẤT LƯỢNG (PDF)
@@ -402,36 +408,25 @@
             fetch(url).catch(err => console.log("Lệnh 1 chiều đã phát:", relayId, state));
         }
 
-        function changeActivePond(pondVal) {
-            activePond = pondVal;
-            const pondInfo = POND_RELAY_MAP[activePond];
-
-            document.getElementById('dash-pond-title').innerText = pondInfo.name;
-            renderPondTelemetry();
-
-            document.getElementById('ctrl-section-title').children[0].innerText = `THIẾT BỊ DÀNH RIÊNG CHO ${pondInfo.name}`;
+        function changeActivePond(pondId) {
+            activePond = pondId;
+            document.getElementById('pond-select').value = pondId;
             
-            document.getElementById('label-relay-van').innerText = `Van Điện ${pondInfo.name} (${pondInfo.van})`;
-            document.getElementById('label-relay-quat').innerText = `Dàn Quạt Nước ${pondInfo.name} (${pondInfo.quat})`;
-            document.getElementById('label-relay-xaday').innerText = `Bơm Xả Đáy ${pondInfo.name} (${pondInfo.xaday})`;
-
-            document.getElementById('chk-relay-van').checked = false;
-            document.getElementById('chk-relay-quat').checked = false;
-            document.getElementById('chk-relay-xaday').checked = false;
-
-            document.getElementById('passport-pond-name').innerText = pondInfo.name;
+            // Các code render Dashboard cũ của bạn ở đây...
+            
+            // Cập nhật lại mã QR Code
             generateQRCode();
+            
+            // Thêm dòng này: Cập nhật lại giao diện Tab Hộ chiếu số
+            updatePassportUI(); 
         }
 
-        function switchTab(tabName) {
-            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
-            document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+        function switchTab(tabId) {
+            // Các code chuyển Tab cũ của bạn (ẩn/hiện các div) ở đây...
             
-            document.getElementById(`tab-${tabName}`).classList.remove('hidden');
-            document.getElementById(`nav-${tabName}`).classList.add('active');
-
-            if (tabName === 'passport') {
-                generateQRCode();
+            // Nếu người dùng bấm vào Tab Hộ chiếu số, gọi hàm cập nhật dữ liệu
+            if (tabId === 'passport') {
+                updatePassportUI();
             }
         }
 
@@ -673,6 +668,74 @@
             } finally {
                 btnElement.innerHTML = originalText;
                 btnElement.disabled = false;
+            }
+        }
+
+        // =====================================================================
+        // ĐỒNG BỘ DỮ LIỆU UI TAB HỘ CHIẾU SỐ VỚI FILE PDF
+        // =====================================================================
+        async function updatePassportUI() {
+            // Cập nhật tên Ao
+            const pondNameEl = document.getElementById('ui-passport-pond');
+            if(pondNameEl) pondNameEl.innerText = `AO NUÔI ${activePond}`;
+
+            // Reset trạng thái Loading
+            const wqiEl = document.getElementById('ui-passport-wqi');
+            const gradeEl = document.getElementById('ui-passport-grade');
+            const badgeEl = document.getElementById('ui-passport-badge');
+            const descEl = document.getElementById('ui-passport-desc');
+
+            if (wqiEl) wqiEl.innerText = "--";
+            if (gradeEl) gradeEl.innerText = "";
+            if (badgeEl) {
+                badgeEl.innerText = "ĐANG TẢI...";
+                badgeEl.className = "bg-slate-300 text-white font-bold py-2 px-4 rounded-lg text-xs text-center w-28";
+            }
+
+            try {
+                // Gọi chung 1 API với tính năng xuất PDF
+                const url = `${PROXY_URL}?action=get_passport&device_id=${DEVICE_ID}&pond=${activePond}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                if (data.status === "SUCCESS") {
+                    const wqi = data.wqi_score;
+                    const totalRecords = data.history ? data.history.length : 0;
+
+                    if (wqiEl) wqiEl.innerText = wqi;
+                    if (descEl) descEl.innerText = `Quét mã QR để truy xuất nhật ký cảm biến ${totalRecords} bản ghi gần nhất của ao nuôi này`;
+
+                    // Tính toán Grade và Màu sắc hiển thị
+                    let grade = "";
+                    let badgeText = "";
+                    let badgeClass = "text-white font-bold py-2 px-4 rounded-lg text-xs text-center w-28 ";
+
+                    if (wqi >= 90) {
+                        grade = "(Grade A+)"; badgeText = "XUẤT SẮC"; badgeClass += "bg-emerald-500";
+                        wqiEl.className = "text-4xl font-black text-emerald-500";
+                    } else if (wqi >= 70) {
+                        grade = "(Grade A)"; badgeText = "ĐẠT CHUẨN"; badgeClass += "bg-emerald-500";
+                        wqiEl.className = "text-4xl font-black text-emerald-500";
+                    } else if (wqi >= 50) {
+                        grade = "(Grade B)"; badgeText = "CẦN CẢI THIỆN"; badgeClass += "bg-amber-500";
+                        wqiEl.className = "text-4xl font-black text-amber-500";
+                    } else {
+                        grade = "(Grade C)"; badgeText = "NGUY HIỂM"; badgeClass += "bg-rose-500";
+                        wqiEl.className = "text-4xl font-black text-rose-500";
+                    }
+
+                    if (gradeEl) gradeEl.innerText = grade;
+                    if (badgeEl) {
+                        badgeEl.innerText = badgeText;
+                        badgeEl.className = badgeClass;
+                    }
+                }
+            } catch (error) {
+                console.error("Lỗi đồng bộ Hộ chiếu số:", error);
+                if (badgeEl) {
+                    badgeEl.innerText = "LỖI KẾT NỐI";
+                    badgeEl.className = "bg-rose-500 text-white font-bold py-2 px-4 rounded-lg text-xs text-center w-28";
+                }
             }
         }
 
