@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WioT - Intelligent Control System</title>
+    <title>WioT AquaSense - PWA Management</title>
     
     <!-- PWA Manifest & Theme -->
     <meta name="theme-color" content="#0284c7">
@@ -36,9 +36,8 @@
             <div class="flex items-center space-x-2">
                 <i class="fa-solid fa-water text-2xl text-sky-300"></i>
                 <div>
-                    <h1 class="font-black text-lg leading-none tracking-wide">WioT</h1>
-                    <!-- DEVICE_ID ĐỘNG TỰ ĐỘNG CẬP NHẬT TỪ QR CODE -->
-                    <span id="header-device-id" class="text-[11px] font-mono font-bold text-sky-200 tracking-wider">AQS-260814022755</span>
+                    <h1 class="font-black text-lg leading-none tracking-wide">WioT AquaSense</h1>
+                    <span class="text-[10px] text-sky-200">Điều khiển 1 chiều tiết kiệm API Quota</span>
                 </div>
             </div>
             <span id="connection-status" class="bg-emerald-500 text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 font-bold">
@@ -48,12 +47,12 @@
 
         <div class="bg-sky-800/80 p-1.5 rounded-xl border border-sky-600/50 flex items-center justify-between">
             <label for="pond-select" class="text-xs font-bold text-sky-100 pl-2 flex items-center gap-1.5">
-                <i class="fa-solid fa-fish text-sky-300"></i> CHỌN AO NUÔI:
+                <i class="fa-solid fa-fish text-sky-300"></i> BẬT AO NUÔI:
             </label>
             <select id="pond-select" onchange="changeActivePond(this.value)" class="bg-slate-900 text-sky-300 font-black text-xs px-3 py-1.5 rounded-lg border border-sky-500 focus:outline-none cursor-pointer">
-                <option value="1" selected>AO NUÔI 1</option>
+                <option value="1">AO NUÔI 1</option>
                 <option value="2">AO NUÔI 2</option>
-                <option value="3">AO NUÔI 3</option>
+                <option value="3" selected>AO NUÔI 3</option>
                 <option value="4">AO NUÔI 4</option>
             </select>
         </div>
@@ -67,7 +66,7 @@
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                 <div>
                     <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Đang theo dõi</span>
-                    <h2 id="dash-pond-title" class="text-lg font-black text-sky-700">AO NUÔI 1</h2>
+                    <h2 id="dash-pond-title" class="text-lg font-black text-sky-700">AO NUÔI 3</h2>
                 </div>
                 <div class="text-right flex items-center gap-2">
                     <div>
@@ -108,11 +107,11 @@
                 <div class="bg-white p-4 rounded-2xl shadow-sm border-l-4 border-amber-500">
                     <div class="flex justify-between items-center text-slate-400 text-xs mb-1 font-medium">
                         <span>Độ mặn EC</span>
-                        <i class="fa-solid fa-droplet text-amber-500"></i>
+                        <i class="fa-solid fa-water-latter text-amber-500"></i>
                     </div>
                     <div class="flex items-baseline space-x-1">
                         <span id="val-ec" class="text-3xl font-black text-slate-800">--.--</span>
-                        <span class="text-xs text-slate-500 font-bold">ppt</span>
+                        <span class="text-xs text-slate-500">ppt</span>
                     </div>
                     <span class="text-[10px] text-amber-600 font-semibold bg-amber-50 px-1.5 py-0.5 rounded mt-2 inline-block">Ổn định</span>
                 </div>
@@ -131,16 +130,18 @@
             </div>
         </section>
 
-        <!-- TAB 2: ĐIỀU KHIỂN TỪ XA -->
+        <!-- TAB 2: ĐIỀU KHIỂN TỪ XA 1 CHIỀU -->
         <section id="tab-control" class="tab-content space-y-4 hidden">
+            
+            <!-- NÚT CHUYỂN CHẾ ĐỘ AUTO / MANUAL (ĐỒNG BỘ LIGHT THEME) -->
             <div id="btn-manual-toggle" onclick="toggleManualMode1Way()" class="cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 transition-all duration-200 flex items-center justify-between">
                 <div class="flex items-center space-x-3">
                     <div id="manual-icon-box" class="p-3 bg-slate-100 text-slate-500 rounded-xl transition-all">
                         <i id="manual-icon" class="fa-solid fa-robot text-xl"></i>
                     </div>
                     <div>
-                        <p id="manual-status-title" class="font-bold text-sm text-slate-800">CHẾ ĐỘ TỰ ĐỘNG</p>
-                        <p id="manual-status-desc" class="text-[11px] text-slate-400">Chạm để bật điều khiển thủ công</p>
+                        <p id="manual-status-title" class="font-bold text-sm text-slate-800">CHẾ ĐỘ TỰ ĐỘNG (AUTO)</p>
+                        <p id="manual-status-desc" class="text-[11px] text-slate-400">Chạm để bật Thủ công (Gửi LB100 = OFF)</p>
                     </div>
                 </div>
                 <div id="manual-badge" class="px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-lg border border-slate-200 uppercase tracking-wider">
@@ -148,10 +149,13 @@
                 </div>
             </div>
 
+            <!-- BẢNG CÔNG TẮC ĐIỀU KHIỂN -->
             <div id="control-panel-container" class="opacity-50 pointer-events-none transition-all duration-300 space-y-4">
+                
+                <!-- THIẾT BỊ THEO AO -->
                 <div class="bg-white rounded-2xl p-4 shadow-sm space-y-4 border border-slate-200">
                     <h3 id="ctrl-section-title" class="font-black text-sky-700 text-xs uppercase tracking-wider border-b pb-2 flex items-center justify-between">
-                        <span>THIẾT BỊ DÀNH RIÊNG CHO AO NUÔI 1</span>
+                        <span>THIẾT BỊ DÀNH RIÊNG CHO AO NUÔI 3</span>
                         <i class="fa-solid fa-sliders"></i>
                     </h3>
 
@@ -159,7 +163,7 @@
                         <div class="flex items-center space-x-3">
                             <div class="p-2.5 bg-sky-100 text-sky-600 rounded-lg"><i class="fa-solid fa-faucet-drip"></i></div>
                             <div>
-                                <p id="label-relay-van" class="font-bold text-sm text-slate-800">Van Điện Ao 1 (Y0)</p>
+                                <p id="label-relay-van" class="font-bold text-sm text-slate-800">Van Điện Ao 3 (Y2)</p>
                                 <p class="text-[10px] text-slate-400">Van cấp nước vào ao nuôi</p>
                             </div>
                         </div>
@@ -173,7 +177,7 @@
                         <div class="flex items-center space-x-3">
                             <div class="p-2.5 bg-amber-100 text-amber-600 rounded-lg"><i class="fa-solid fa-fan"></i></div>
                             <div>
-                                <p id="label-relay-quat" class="font-bold text-sm text-slate-800">Dàn Quạt Nước Ao 1 (Y10)</p>
+                                <p id="label-relay-quat" class="font-bold text-sm text-slate-800">Dàn Quạt Nước Ao 3 (Y12)</p>
                                 <p class="text-[10px] text-slate-400">Sục khí & lưu thông dòng nước</p>
                             </div>
                         </div>
@@ -187,7 +191,7 @@
                         <div class="flex items-center space-x-3">
                             <div class="p-2.5 bg-purple-100 text-purple-600 rounded-lg"><i class="fa-solid fa-dumpster"></i></div>
                             <div>
-                                <p id="label-relay-xaday" class="font-bold text-sm text-slate-800">Bơm Xả Đáy Ao 1 (Y14)</p>
+                                <p id="label-relay-xaday" class="font-bold text-sm text-slate-800">Bơm Xả Đáy Ao 3 (Y16)</p>
                                 <p class="text-[10px] text-slate-400">Hút xi-phông phân tôm & chất thải</p>
                             </div>
                         </div>
@@ -198,9 +202,11 @@
                     </div>
                 </div>
 
+                <!-- BƠM TRUNG TÂM -->
                 <div class="bg-white rounded-2xl p-4 shadow-sm space-y-3 border border-slate-200">
                     <h3 class="font-bold text-slate-700 text-xs uppercase tracking-wider border-b pb-2">Bơm & Van Trung Tâm (Toggle ON/OFF)</h3>
                     <div class="grid grid-cols-2 gap-2 text-xs">
+                        
                         <button id="btn-relay-Y4" onclick="toggleCommonRelay1Way('Y4')" class="p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-700 text-left flex justify-between items-center transition-all">
                             <div>
                                 <p class="text-xs">BƠM AO (Y4)</p>
@@ -232,8 +238,10 @@
                             </div>
                             <i id="icon-Y7" class="fa-solid fa-power-off text-slate-400 text-base"></i>
                         </button>
+
                     </div>
                 </div>
+
             </div>
         </section>
 
@@ -243,7 +251,7 @@
                 <div class="border-b pb-3">
                     <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">VERIFIED DIGITAL PASSPORT</span>
                     <h2 class="text-lg font-black text-slate-800 mt-2">HỘ CHIẾU SỐ THỦY SẢN</h2>
-                    <p class="text-xs text-slate-500">Đầm tôm Cà Mau - <span id="passport-pond-name" class="font-black text-sky-700">AO NUÔI 1</span></p>
+                    <p class="text-xs text-slate-500">Đầm tôm Cà Mau - <span id="passport-pond-name" class="font-black text-sky-700">AO NUÔI 3</span></p>
                 </div>
 
                 <div class="flex justify-center my-2">
@@ -270,33 +278,24 @@
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-2 z-50">
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn active flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500">
             <i class="fa-solid fa-chart-line text-lg mb-0.5"></i>
-            <span>GIÁM SÁT</span>
+            <span>Giám sát</span>
         </button>
         <button onclick="switchTab('control')" id="nav-control" class="tab-btn flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500">
             <i class="fa-solid fa-sliders text-lg mb-0.5"></i>
-            <span>ĐIỀU KHIỂN</span>
+            <span>Điều khiển</span>
         </button>
         <button onclick="switchTab('passport')" id="nav-passport" class="tab-btn flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500">
             <i class="fa-solid fa-qrcode text-lg mb-0.5"></i>
-            <span>HỘ CHIẾU SỐ</span>
+            <span>Hộ chiếu số</span>
         </button>
     </nav>
 
     <!-- LOGIC SCRIPT -->
     <script>
         const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev";
+        const DEVICE_ID = "AQS-88902A34";
 
-        // TỰ ĐỘNG BẮT DEVICE_ID TỪ MÃ QR HOẶC LOCALSTORAGE (SCAN-TO-CLAIM)
-        const urlParams = new URLSearchParams(window.location.search);
-        let scannedDevice = urlParams.get('device');
-
-        if (scannedDevice && scannedDevice.startsWith("AQS-")) {
-            localStorage.setItem('WIOT_ACTIVE_DEVICE', scannedDevice);
-        }
-
-        const DEVICE_ID = scannedDevice || localStorage.getItem('WIOT_ACTIVE_DEVICE') || "WIOT123456789";
-
-        let activePond = "1";
+        let activePond = "3";
         let isManualMode = false;
         let cachedTelemetryData = null;
 
@@ -309,6 +308,7 @@
             "4": { name: "AO NUÔI 4", van: "Y3", quat: "Y13", xaday: "Y17" }
         };
 
+        // HÀM CHUYỂN ĐỔI AUTO / MANUAL VỚI GIAO DIỆN LIGHT THEME
         function toggleManualMode1Way() {
             isManualMode = !isManualMode;
             
@@ -325,13 +325,13 @@
                 iconBox.className = "p-3 bg-amber-100 text-amber-600 rounded-xl transition-all";
                 icon.className = "fa-solid fa-hand-pointer text-xl animate-bounce";
                 
-                title.innerText = "CHẾ ĐỘ THỦ CÔNG";
+                title.innerText = "CHẾ ĐỘ THỦ CÔNG (MANUAL ACTIVE)";
                 title.className = "font-black text-sm text-amber-900";
                 
-                desc.innerText = "Đã mở khóa điều khiển";
+                desc.innerText = "Đã gửi LB100 = OFF. Đã mở khóa điều khiển!";
                 desc.className = "text-[11px] text-amber-700 font-medium";
                 
-                badge.innerText = "MANUAL";
+                badge.innerText = "MANUAL ON";
                 badge.className = "px-2.5 py-1 bg-amber-500 text-white text-[10px] font-black rounded-lg shadow-sm uppercase tracking-wider";
                 
                 panelContainer.className = "opacity-100 pointer-events-auto transition-all duration-300 space-y-4";
@@ -342,10 +342,10 @@
                 iconBox.className = "p-3 bg-slate-100 text-slate-500 rounded-xl transition-all";
                 icon.className = "fa-solid fa-robot text-xl";
                 
-                title.innerText = "CHẾ ĐỘ TỰ ĐỘNG";
+                title.innerText = "CHẾ ĐỘ TỰ ĐỘNG (AUTO)";
                 title.className = "font-bold text-sm text-slate-800";
                 
-                desc.innerText = "Chạm để bật điều khiển thủ công";
+                desc.innerText = "Chạm để bật Thủ công (Gửi LB100 = OFF)";
                 desc.className = "text-[11px] text-slate-400";
                 
                 badge.innerText = "AUTO";
@@ -426,15 +426,15 @@
 
         async function fetchTelemetryData() {
             try {
-                const response = await fetch(`${PROXY_URL}?action=get_dashboard&device_id=${DEVICE_ID}`);
+                const response = await fetch(`${PROXY_URL}?action=get_dashboard`);
                 cachedTelemetryData = await response.json();
                 renderPondTelemetry();
             } catch (error) {
                 cachedTelemetryData = {
-                    pond1: { ph: "8.15", ec: "18.5", orp: "280", temp: "28.5", ts: "07:41:05", date: "14/08/2026" },
-                    pond2: { ph: "8.05", ec: "19.1", orp: "310", temp: "29.0", ts: "07:45:22", date: "14/08/2026" },
-                    pond3: { ph: "8.20", ec: "17.8", orp: "250", temp: "28.2", ts: "07:51:33", date: "14/08/2026" },
-                    pond4: { ph: "7.95", ec: "18.2", orp: "295", temp: "28.8", ts: "07:56:10", date: "14/08/2026" }
+                    pond1: { ph: "8.15", ec: "18.5", orp: "280", temp: "28.5", ts: "07:41:05", date: "13/08/2026" },
+                    pond2: { ph: "8.05", ec: "19.1", orp: "310", temp: "29.0", ts: "07:45:22", date: "13/08/2026" },
+                    pond3: { ph: "8.20", ec: "17.8", orp: "250", temp: "28.2", ts: "07:51:33", date: "13/08/2026" },
+                    pond4: { ph: "7.95", ec: "18.2", orp: "295", temp: "28.8", ts: "07:56:10", date: "13/08/2026" }
                 };
                 renderPondTelemetry();
             }
@@ -444,7 +444,7 @@
             if (!cachedTelemetryData) return;
 
             const pondKey = `pond${activePond}`;
-            const pondData = cachedTelemetryData[pondKey] || cachedTelemetryData.pond1;
+            const pondData = cachedTelemetryData[pondKey] || cachedTelemetryData.pond3;
 
             if (pondData) {
                 document.getElementById('val-ph').innerText = pondData.ph || "--.--";
@@ -480,8 +480,7 @@
 
         setInterval(fetchTelemetryData, 5000);
         window.onload = () => {
-            document.getElementById('header-device-id').innerText = DEVICE_ID;
-            changeActivePond("1");
+            changeActivePond("3");
             fetchTelemetryData();
         };
     </script>
