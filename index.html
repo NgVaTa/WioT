@@ -531,22 +531,22 @@
                 const wqiText = data.wqi_score >= 70 ? 'ĐẠT CHUẨN XUẤT KHẨU' : 'CẦN CẢI THIỆN MÔI TRƯỜNG';
 
                 // =====================================================================
-                // 2. TEMPLATE HTML CHUẨN KHỔ GIẤY A4 (794px) KÈM LOGO FAVICON
+                // TEMPLATE HTML CHUẨN KHỔ GIẤY A4 (794px) VỚI LOGO THƯƠNG HIỆU
                 // =====================================================================
                 const pdfHTML = `
                     <div id="print-wrapper" style="width: 794px; box-sizing: border-box; padding: 20px; font-family: 'Segoe UI', Arial, sans-serif; color: #1e293b; background: white; margin: 0 auto; position: relative;">
                         
                         <!-- Watermark Logo Chìm -->
-                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.04; pointer-events: none; z-index: 0;">
-                            <img src="./favicon.png" width="400">
+                        <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.05; pointer-events: none; z-index: 0; text-align: center;">
+                            <img src="./logo.png" style="width: 350px; max-height: 350px; object-fit: contain;">
                         </div>
 
                         <!-- TRANG 1: MẶT TRƯỚC CHỨNG THƯ -->
                         <div style="position: relative; z-index: 1; border: 3px solid #003882; padding: 4px; height: 1040px; box-sizing: border-box;">
                             <div style="border: 1px solid #1ea6d9; padding: 60px 40px; text-align: center; height: 100%; box-sizing: border-box; background: linear-gradient(to bottom, #ffffff, #f4f9ff); position: relative;">
                                 
-                                <!-- Header Logo dùng favicon.png -->
-                                <img src="./favicon.png" height="85" style="margin: 0 auto 25px auto;">
+                                <!-- Header Logo Thương Hiệu -->
+                                <img src="./logo.png" style="height: 75px; max-width: 300px; object-fit: contain; margin: 0 auto 25px auto; display: block;">
                                 
                                 <!-- Tiêu đề chứng thư -->
                                 <h1 style="font-size: 32px; font-weight: 900; color: #003882; text-transform: uppercase; margin-bottom: 5px; letter-spacing: 1px;">CHỨNG THƯ CHẤT LƯỢNG NƯỚC THỦY SẢN</h1>
@@ -588,7 +588,7 @@
                                     <h2 style="font-size: 22px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 0;">PHỤ LỤC: NHẬT KÝ QUAN TRẮC MÔI TRƯỜNG</h2>
                                     <p style="font-size: 13px; color: #64748b; margin: 6px 0 0 0;">Trích xuất ${data.history.length} bản ghi gần nhất. Đo tự động bằng hệ thống cảm biến chuẩn công nghiệp.</p>
                                 </div>
-                                <img src="./favicon.png" height="45">
+                                <img src="./logo.png" style="height: 40px; object-fit: contain;">
                             </div>
                             
                             <table style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden; box-shadow: 0 0 0 1px #e2e8f0;">
