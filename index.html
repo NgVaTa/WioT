@@ -703,7 +703,7 @@
                 if (data.status === "SUCCESS") {
                     const wqi = data.wqi_score; const latest = data.latest;
                     if (wqiEl) wqiEl.innerText = wqi;
-                    if (descEl) descEl.innerHTML = `Quét mã QR để truy xuất ${data.history ? data.history.length : 0} bản ghi gần nhất của ao nuôi này.<br>Tiêu chuẩn áp dụng: ASC / BAP.`;
+                    if (descEl) descEl.innerHTML = `Quét mã QR để truy xuất ${data.history ? data.history.length : 0} bản ghi gần nhất của ao nuôi.<br>Tiêu chuẩn áp dụng: ASC / BAP.`;
 
                     let grade = "", badgeText = "", badgeClass = "text-white font-bold py-2 px-4 rounded-lg text-xs text-center w-28 shadow-sm ";
                     if (wqi >= 90) { grade = "(Hạng A+)"; badgeText = "XUẤT SẮC"; badgeClass += "bg-emerald-500"; wqiEl.className = "text-4xl font-black text-emerald-500"; } 
