@@ -18,36 +18,16 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     
+    <!-- THÊM THƯ VIỆN CHART.JS ĐỂ VẼ BIỂU ĐỒ -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <style>
-        body { 
-            -webkit-tap-highlight-color: transparent; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; 
-        }
-        .tab-btn.active { 
-            color: #0284c7; 
-            border-bottom: 3px solid #0284c7; 
-            font-weight: 700; 
-        }
-        @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(10px); } 
-            to { opacity: 1; transform: translateY(0); } 
-        }
-        .animate-fade-in { 
-            animation: fadeIn 0.4s ease-out forwards; 
-        }
-        
-        /* Ẩn icon con mắt mặc định của trình duyệt để căn giữa mã PIN */
-        input[type="password"]::-ms-reveal,
-        input[type="password"]::-ms-clear { 
-            display: none; 
-        }
-        input[type="password"]::-webkit-contacts-auto-fill-button,
-        input[type="password"]::-webkit-credentials-auto-fill-button { 
-            visibility: hidden; 
-            pointer-events: none; 
-            position: absolute; 
-            right: 0; 
-        }
+        body { -webkit-tap-highlight-color: transparent; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        .tab-btn.active { color: #0284c7; border-bottom: 3px solid #0284c7; font-weight: 700; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
+        input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }
+        input[type="password"]::-webkit-contacts-auto-fill-button, input[type="password"]::-webkit-credentials-auto-fill-button { visibility: hidden; pointer-events: none; position: absolute; right: 0; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 pb-24 select-none">
@@ -55,20 +35,15 @@
     <!-- HEADER & CHỌN AO NUÔI -->
     <header class="bg-sky-700 text-white p-4 sticky top-0 z-50 shadow-md">
         <div class="flex justify-between items-center mb-3">
-            
-            <!-- GÓC TRÁI: LOGO THƯƠNG HIỆU -->
             <div class="flex items-center justify-start h-10 w-36 overflow-hidden flex-shrink-0">
                 <img src="./cover.png" alt="WioT Logo" class="w-full h-auto transform scale-[1.0] origin-center object-contain">
             </div>
-            
-            <!-- GÓC PHẢI: TRẠNG THÁI & DEVICE ID -->
             <div class="flex flex-col items-end">
                 <span id="connection-status" class="bg-emerald-500 text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 font-bold mb-1 shadow-inner">
                     <span class="w-2 h-2 bg-white rounded-full animate-ping"></span> ONLINE
                 </span>
                 <span id="header-device-id" class="text-[10px] font-mono font-semibold text-sky-200 tracking-wider">LOADING...</span>
             </div>
-            
         </div>
 
         <div class="bg-sky-800/80 p-1.5 rounded-xl border border-sky-600/50 flex items-center justify-between">
@@ -86,7 +61,7 @@
 
     <main class="max-w-md mx-auto p-4 space-y-4">
         
-        <!-- TAB 1: GIÁM SÁT & AI -->
+        <!-- TAB 1: GIÁM SÁT & BIỂU ĐỒ AI -->
         <section id="tab-dashboard" class="tab-content space-y-4">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                 <div>
@@ -110,6 +85,23 @@
                     <i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Đang tải dữ liệu...
                 </div>
             </div>
+
+            <!-- KHỐI BIỂU ĐỒ PHÂN TÍCH -->
+            <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 mt-4">
+                <div class="flex justify-between items-center mb-4">
+                    <div class="flex items-center">
+                        <i class="fa-solid fa-chart-area text-sky-600 text-lg mr-2"></i>
+                        <h3 class="font-black text-slate-800 text-xs uppercase tracking-wide">BIỂU ĐỒ CHU KỲ 7 NGÀY</h3>
+                    </div>
+                    <button onclick="loadHealthChart()" id="btn-load-chart" class="px-3 py-1 bg-sky-100 hover:bg-sky-200 text-sky-700 text-[10px] font-bold rounded-lg transition">
+                        TẢI BIỂU ĐỒ
+                    </button>
+                </div>
+                
+                <div class="relative w-full h-48">
+                    <canvas id="healthChart"></canvas>
+                </div>
+            </div>
         </section>
 
         <!-- TAB 2: ĐIỀU KHIỂN & BẢO MẬT -->
@@ -119,22 +111,21 @@
                 <div class="inline-block p-4 bg-sky-50 text-sky-600 rounded-full mb-4">
                     <i class="fa-solid fa-lock text-4xl"></i>
                 </div>
-                <h3 class="text-lg font-black text-slate-800 uppercase tracking-wide">Xác thực Chủ Ao nuôi</h3>
+                <h3 class="text-lg font-black text-slate-800 uppercase tracking-wide">Xác thực Chủ Đầm</h3>
                 <p class="text-[13px] text-slate-500 mt-2 mb-6 font-medium">Vui lòng nhập mã PIN 4 số để mở khóa Trung tâm điều khiển thiết bị WioT.</p>
-                
                 <div class="flex justify-center mb-5">
                     <input type="password" id="pin-input" inputmode="numeric" maxlength="4" placeholder="••••" 
                            class="w-48 text-center text-2xl font-black tracking-[0.5em] p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-sky-500 focus:outline-none transition-all placeholder:text-slate-300 placeholder:tracking-normal">
                 </div>
-                
                 <p id="pin-error-msg" class="text-rose-500 text-xs font-bold mb-4 opacity-0 transition-opacity">Mã PIN không chính xác!</p>
                 <button onclick="verifyOwnerPin()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 rounded-xl shadow-md transition duration-300 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-unlock-keyhole"></i> MỞ KHÓA HỆ THỐNG
                 </button>
             </div>
 
-            <!-- BẢNG ĐIỀU KHIỂN (ẨN MẶC ĐỊNH) -->
+            <!-- BẢNG ĐIỀU KHIỂN -->
             <div id="unlocked-control-panel" class="hidden space-y-4 animate-fade-in">
+                <!-- Giữ nguyên code điều khiển như phiên bản trước -->
                 <div id="btn-manual-toggle" onclick="toggleManualMode1Way()" class="cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 transition-all duration-200 flex items-center justify-between">
                     <div class="flex items-center space-x-3">
                         <div id="manual-icon-box" class="p-3 bg-slate-100 text-slate-500 rounded-xl transition-all">
@@ -234,8 +225,9 @@
             </div>
         </section>
 
-        <!-- TAB 3: HỘ CHIẾU SỐ & PDF -->
+        <!-- TAB 3: HỘ CHIẾU SỐ & PDF (Giữ nguyên) -->
         <section id="tab-passport" class="tab-content space-y-4 hidden">
+            <!-- ... Giữ nguyên toàn bộ nội dung phần tab-passport như code cũ ... -->
             <div class="bg-white rounded-2xl p-5 shadow-md border border-slate-200 text-center space-y-4">
                 <div class="border-b pb-3">
                     <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">VERIFIED DIGITAL PASSPORT</span>
@@ -287,12 +279,10 @@
         </button>
     </nav>
 
-    <!-- LOGIC CORE SCRIPT -->
+    <!-- LOGIC SCRIPT -->
     <script>
-        // CẤU HÌNH API BACKEND
         const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev/"; // <<< THAY LINK CỦA BẠN VÀO ĐÂY
         
-        // TỰ ĐỘNG BẮT DEVICE_ID TỪ URL HOẶC CACHE
         const urlParams = new URLSearchParams(window.location.search);
         let scannedDevice = urlParams.get('device');
         if (scannedDevice && scannedDevice.startsWith("AQS-")) {
@@ -300,14 +290,13 @@
         }
         const DEVICE_ID = scannedDevice || localStorage.getItem('WIOT_ACTIVE_DEVICE') || "WIOT260815154407";
 
-        // MÃ PIN CỐ ĐỊNH TỪ NHÀ SẢN XUẤT (FACTORY DEFAULT)
-        const OWNER_PIN = "8888"; 
-
-        // TRẠNG THÁI HỆ THỐNG
+        let OWNER_PIN = "8888"; 
         let activePond = "1";
         let isGuestMode = false;
         let isControlUnlocked = false; 
         let isManualMode = false;
+        let healthChartInstance = null; // Biến lưu trữ biểu đồ
+
         const commonRelayStates = { Y4: 0, Y5: 0, Y6: 0, Y7: 0 };
         const POND_RELAY_MAP = {
             "1": { name: "AO NUÔI 1", van: "Y0", quat: "Y10", xaday: "Y14" },
@@ -316,7 +305,6 @@
             "4": { name: "AO NUÔI 4", van: "Y3", quat: "Y13", xaday: "Y17" }
         };
 
-        // KHỞI TẠO APP
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('header-device-id').innerText = DEVICE_ID;
             
@@ -324,7 +312,6 @@
             const tabParam = urlParams.get('tab');
             const roleParam = urlParams.get('role'); 
 
-            // PHÂN QUYỀN GUEST (ẨN ĐIỀU KHIỂN)
             if (roleParam === 'guest') {
                 isGuestMode = true;
                 const navControl = document.getElementById('nav-control');
@@ -345,9 +332,11 @@
             
             fetchTelemetryData();
             setInterval(fetchTelemetryData, 5000);
+            
+            // Tải biểu đồ lần đầu
+            setTimeout(loadHealthChart, 1000);
         });
 
-        // XÁC THỰC MÃ PIN
         function verifyOwnerPin() {
             const inputVal = document.getElementById('pin-input').value;
             const errorMsg = document.getElementById('pin-error-msg');
@@ -383,14 +372,18 @@
 
             document.getElementById('dash-pond-title').innerText = pondInfo.name;
             document.getElementById('monitor-cards-grid').innerHTML = '<div class="col-span-2 text-center text-gray-400 py-10"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Đang tải dữ liệu...</div>';
+            
+            // Xóa AI panel cũ
             const aiPanel = document.getElementById('ai-insight-panel');
             if (aiPanel) aiPanel.remove();
 
+            // Cập nhật text phần điều khiển
             document.getElementById('ctrl-section-title').children[0].innerText = `THIẾT BỊ DÀNH RIÊNG CHO ${pondInfo.name}`;
             document.getElementById('label-relay-van').innerText = `Van Điện ${pondInfo.name} (${pondInfo.van})`;
             document.getElementById('label-relay-quat').innerText = `Dàn Quạt Nước ${pondInfo.name} (${pondInfo.quat})`;
             document.getElementById('label-relay-xaday').innerText = `Bơm Xả Đáy ${pondInfo.name} (${pondInfo.xaday})`;
             
+            // Đặt lại nút
             document.getElementById('chk-relay-van').checked = false;
             document.getElementById('chk-relay-quat').checked = false;
             document.getElementById('chk-relay-xaday').checked = false;
@@ -398,22 +391,102 @@
             generateQRCode();
             updatePassportUI();
             fetchTelemetryData();
+            
+            // Tải lại biểu đồ cho ao mới
+            loadHealthChart();
         }
 
-        function generateQRCode() {
-            const qrContainer = document.getElementById("qrcode");
-            qrContainer.innerHTML = "";
-            const passportURL = `${window.location.origin}${window.location.pathname}?device=${DEVICE_ID}&pond=${activePond}&tab=passport&role=guest`;
-            new QRCode(qrContainer, { text: passportURL, width: 150, height: 150, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
+        // ==========================================
+        // VẼ BIỂU ĐỒ BẰNG CHART.JS
+        // ==========================================
+        async function loadHealthChart() {
+            const btn = document.getElementById('btn-load-chart');
+            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẢI';
+            
+            try {
+                const url = `${PROXY_URL}?action=get_chart_data&device_id=${DEVICE_ID}&pond=${activePond}`;
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if(data.status === "SUCCESS" && data.chart_data) {
+                    const ctx = document.getElementById('healthChart').getContext('2d');
+                    
+                    if(healthChartInstance) {
+                        healthChartInstance.destroy();
+                    }
+                    
+                    healthChartInstance = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: data.chart_data.labels,
+                            datasets: [
+                                {
+                                    label: 'pH',
+                                    data: data.chart_data.ph,
+                                    borderColor: '#1ea6d9',
+                                    backgroundColor: 'rgba(30, 166, 217, 0.1)',
+                                    yAxisID: 'y',
+                                    tension: 0.4,
+                                    borderWidth: 2,
+                                    pointRadius: 3
+                                },
+                                {
+                                    label: 'Nhiệt độ (°C)',
+                                    data: data.chart_data.temp,
+                                    borderColor: '#ef4444',
+                                    backgroundColor: 'transparent',
+                                    yAxisID: 'y1',
+                                    tension: 0.4,
+                                    borderWidth: 2,
+                                    borderDash: [5, 5],
+                                    pointRadius: 3
+                                }
+                            ]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            interaction: {
+                              mode: 'index',
+                              intersect: false,
+                            },
+                            plugins: {
+                                legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } }
+                            },
+                            scales: {
+                                y: {
+                                    type: 'linear', display: true, position: 'left',
+                                    title: { display: true, text: 'pH', font: { size: 10 } }
+                                },
+                                y1: {
+                                    type: 'linear', display: true, position: 'right',
+                                    grid: { drawOnChartArea: false },
+                                    title: { display: true, text: 'Nhiệt độ', font: { size: 10 } }
+                                }
+                            }
+                        }
+                    });
+                }
+            } catch (err) {
+                console.error("Lỗi vẽ biểu đồ:", err);
+            } finally {
+                btn.innerHTML = '<i class="fa-solid fa-rotate"></i> LÀM MỚI';
+            }
         }
 
-        // TẢI DASHBOARD & AI INSIGHT
+        // ==========================================
+        // CÁC HÀM CŨ GIỮ NGUYÊN (Fetch, Control, PDF)
+        // ==========================================
         async function fetchTelemetryData() {
             try {
                 const url = `${PROXY_URL}?action=get_dashboard&device_id=${DEVICE_ID}`;
                 const response = await fetch(url);
                 const data = await response.json();
                 
+                if (data.owner_pin) {
+                    OWNER_PIN = data.owner_pin;
+                }
+
                 const pondKey = `pond${activePond}`;
                 const pondData = data[pondKey];
 
@@ -508,7 +581,7 @@
             }
         }
 
-        // ĐIỀU KHIỂN RƠ LE
+        // Các hàm gửi lệnh điều khiển (Giữ nguyên)
         function toggleManualMode1Way() {
             isManualMode = !isManualMode;
             const btn = document.getElementById('btn-manual-toggle');
@@ -579,7 +652,6 @@
             fetch(url).catch(err => console.log("Lệnh phát đi:", relayId, state));
         }
 
-        // TẢI UI HỘ CHIẾU SỐ VÀ CHUẨN ĐOÁN LỖI
         async function updatePassportUI() {
             const pondNameEl = document.getElementById('ui-passport-pond');
             if(pondNameEl) pondNameEl.innerText = `AO NUÔI ${activePond}`;
@@ -647,7 +719,6 @@
             } catch (error) { console.error("Lỗi updatePassportUI:", error); }
         }
 
-        // XUẤT FILE PDF SMART CHUNKING
         async function downloadCertificatePDF(btnElement) {
             const originalText = btnElement.innerHTML;
             btnElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẠO PDF...`;
