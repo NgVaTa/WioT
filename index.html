@@ -281,11 +281,29 @@
             "4": { name: "AO NUÔI 4", van: "Y3", quat: "Y13", xaday: "Y17" }
         };
 
-        // KHỞI TẠO WEB APP KHI TẢI TRANG
+        // Thêm biến toàn cục ở đầu file script để kiểm soát quyền
+        let isGuestMode = false;
+
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('header-device-id').innerText = DEVICE_ID;
+            
+            const urlParams = new URLSearchParams(window.location.search);
             const pondParam = urlParams.get('pond');
             const tabParam = urlParams.get('tab');
+            const roleParam = urlParams.get('role'); // Lấy biến phân quyền
+
+            // KIỂM TRA PHÂN QUYỀN
+            if (roleParam === 'guest') {
+                isGuestMode = true;
+                
+                // 1. Ẩn hoàn toàn nút Tab Điều khiển ở menu dưới cùng
+                const navControl = document.getElementById('nav-control');
+                if (navControl) navControl.style.display = 'none';
+                
+                // 2. Chia lại tỷ lệ 50-50 cho 2 nút Giám sát và Hộ chiếu
+                document.getElementById('nav-dashboard').classList.replace('flex-1', 'w-1/2');
+                document.getElementById('nav-passport').classList.replace('flex-1', 'w-1/2');
+            }
 
             if (pondParam) {
                 document.getElementById('pond-select').value = pondParam;
@@ -293,11 +311,13 @@
             } else {
                 changeActivePond("1");
             }
+            
             if (tabParam === 'passport') {
                 switchTab('passport');
             }
+            
             fetchTelemetryData();
-            setInterval(fetchTelemetryData, 5000);
+            setInterval(fetchTelemetryData, 3000);
         });
 
         // HÀM CHUYỂN TAB
@@ -345,7 +365,9 @@
         function generateQRCode() {
             const qrContainer = document.getElementById("qrcode");
             qrContainer.innerHTML = "";
-            const passportURL = `${window.location.origin}${window.location.pathname}?device=${DEVICE_ID}&pond=${activePond}&tab=passport`;
+            
+            // Đã nhúng thêm phân quyền &role=guest vào mã QR
+            const passportURL = `${window.location.origin}${window.location.pathname}?device=${DEVICE_ID}&pond=${activePond}&tab=passport&role=guest`;
             
             new QRCode(qrContainer, {
                 text: passportURL,
@@ -529,6 +551,12 @@
         }
 
         function send1WayCommand(relayId, state) {
+            // Lớp khiên bảo vệ cuối cùng
+            if (isGuestMode) {
+                console.warn("Lỗi bảo mật: Chế độ Khách không được phép điều khiển thiết bị!");
+                return; 
+            }
+
             const url = `${PROXY_URL}?action=set_command&device_id=${DEVICE_ID}&relay_id=${relayId}&target_state=${state}`;
             fetch(url).catch(err => console.log("Lệnh phát đi:", relayId, state));
         }
@@ -565,7 +593,10 @@
                     const totalRecords = data.history ? data.history.length : 0;
 
                     if (wqiEl) wqiEl.innerText = wqi;
-                    if (descEl) descEl.innerText = `Quét mã QR để truy xuất ${totalRecords} bản ghi gần nhất của ao nuôi này. Tiêu chuẩn áp dụng: ASC / BAP.`;
+                    if (descEl) {
+                        descEl.innerHTML = `Quét mã QR để truy xuất ${totalRecords} bản ghi gần nhất của ao nuôi này.<br>Tiêu chuẩn áp dụng: ASC / BAP.`;
+                        descEl.className = "text-[11px] text-slate-400 text-center leading-relaxed mt-2 mb-4 px-4"; 
+                    }
 
                     let grade = "";
                     let badgeText = "";
