@@ -109,7 +109,7 @@
                 <div class="inline-block p-4 bg-sky-50 text-sky-600 rounded-full mb-4">
                     <i class="fa-solid fa-lock text-4xl"></i>
                 </div>
-                <h3 class="text-lg font-black text-slate-800 uppercase tracking-wide">Xác thực Chủ Ao nuôi</h3>
+                <h3 class="text-lg font-black text-slate-800 uppercase tracking-wide">Xác thực Chủ Đầm</h3>
                 <p class="text-[13px] text-slate-500 mt-2 mb-6 font-medium">Vui lòng nhập mã PIN 4 số để mở khóa Trung tâm điều khiển thiết bị WioT.</p>
                 <div class="flex justify-center mb-5">
                     <input type="password" id="pin-input" inputmode="numeric" maxlength="4" placeholder="••••" 
@@ -121,7 +121,7 @@
                 </button>
             </div>
 
-            <!-- BẢNG ĐIỀU KHIỂN (SAU KHI MỞ KHÓA) -->
+            <!-- BẢNG ĐIỀU KHIỂN -->
             <div id="unlocked-control-panel" class="hidden space-y-4 animate-fade-in">
                 <div id="btn-manual-toggle" onclick="toggleManualMode1Way()" class="cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 transition-all duration-200 flex items-center justify-between">
                     <div class="flex items-center space-x-3">
@@ -337,6 +337,178 @@
             "4": { name: "AO NUÔI 4", van: "Y3", quat: "Y13", xaday: "Y17" }
         };
 
+        // =========================================================================
+        // 🧠 WIOT LOCAL AI ENGINE: KNOWLEDGE GRAPH & SMART AGENTIC UI
+        // =========================================================================
+        const WioTAquacultureBrain = {
+            rules: [
+                {
+                    code: "PH_LOW",
+                    check: (data) => data.ph < 7.5,
+                    diagnosis: "Độ pH giảm mạnh (< 7.5). Tính axit cao, tôm khó lột xác, khí độc H2S dưới đáy dễ bùng phát.",
+                    actionText: "Khuyến nghị: Đánh vôi 15-20kg/1000m3. Bật 100% quạt nước để xua khí độc.",
+                    smartAction: { relayType: "quat", relayId: null, state: 1, btnLabel: "BẬT DÀN QUẠT NƯỚC" }
+                },
+                {
+                    code: "PH_HIGH",
+                    check: (data) => data.ph > 8.5,
+                    diagnosis: "Độ pH tăng cao (> 8.5). Độc tính của khí NH3 tăng gấp nhiều lần, gây ngạt cho tôm.",
+                    actionText: "Khuyến nghị: Xả bớt nước tầng mặt, thay 20% nước mới. Giảm lượng thức ăn.",
+                    smartAction: { relayType: null, relayId: "Y7", state: 1, btnLabel: "MỞ VAN XẢ TRÀN (Y7)" }
+                },
+                {
+                    code: "PH_FLUCTUATION",
+                    check: (data) => data.phDelta > 0.5,
+                    diagnosis: "Biến thiên pH trong ngày lớn (> 0.5). Hệ đệm yếu, tảo có dấu hiệu tàn hoặc phát triển quá mức.",
+                    actionText: "Khuyến nghị: Tạt mật rỉ đường, bổ sung vi sinh (Bacillus) vào ban đêm."
+                },
+                {
+                    code: "TEMP_LOW",
+                    check: (data) => data.temp < 25,
+                    diagnosis: "Nhiệt độ giảm đột ngột (< 25°C). Tôm giảm ăn, trao đổi chất chậm. Nguy cơ Đốm trắng.",
+                    actionText: "Khuyến nghị: Giảm 30-50% lượng thức ăn tránh dư thừa. Bổ sung Vitamin C."
+                },
+                {
+                    code: "TEMP_HIGH",
+                    check: (data) => data.temp > 32,
+                    diagnosis: "Nhiệt độ tăng cao (> 32°C). Oxy hòa tan giảm mạnh. Khu khuẩn Vibrio dễ bùng phát.",
+                    actionText: "Khuyến nghị: Bật toàn bộ sục khí và quạt nước. Nâng mức nước ao lên 1.2m - 1.5m.",
+                    smartAction: { relayType: "quat", relayId: null, state: 1, btnLabel: "BẬT DÀN QUẠT NƯỚC" }
+                },
+                {
+                    code: "ORP_WARNING",
+                    check: (data) => data.orp >= 150 && data.orp <= 200,
+                    diagnosis: "ORP suy giảm (150-200mV). Đáy ao bắt đầu tích tụ chất thải hữu cơ.",
+                    actionText: "Khuyến nghị: Xi-phông hút đáy nhẹ nhàng. Cắt cử ăn 1 bữa. Bổ sung vi sinh."
+                },
+                {
+                    code: "ORP_DANGER",
+                    check: (data) => data.orp < 150,
+                    diagnosis: "ORP cực thấp (< 150mV). Môi trường yếm khí nặng, sinh khí H2S kịch độc.",
+                    actionText: "Khuyến nghị: Xi-phông xả đáy khẩn cấp. Rải thuốc tím (KMnO4) hoặc Yucca.",
+                    smartAction: { relayType: "xaday", relayId: null, state: 1, btnLabel: "BẬT BƠM XẢ ĐÁY" }
+                },
+                {
+                    code: "EC_DROP",
+                    check: (data) => data.ecTrend < -2.0,
+                    diagnosis: "Độ mặn (EC) sụt giảm đột ngột do mưa lớn. Tôm dễ sốc thẩm thấu, đục cơ.",
+                    actionText: "Khuyến nghị: Mở van xả tràn tầng mặt. Tạt vôi Canxi và khoáng tạt xuống ao.",
+                    smartAction: { relayType: null, relayId: "Y7", state: 1, btnLabel: "MỞ VAN XẢ TRÀN (Y7)" }
+                }
+            ]
+        };
+
+        function executeAICommand(relayType, relayId, state, btnElement) {
+            if (isGuestMode) { alert("Tính năng ĐIỀU KHIỂN bị khóa ở Chế độ Khách (Guest Mode)!"); return; }
+            if (!isControlUnlocked) { alert("BẢO MẬT: Vui lòng sang Tab ĐIỀU KHIỂN và nhập mã PIN để mở khóa hệ thống trước khi ra lệnh!"); return; }
+
+            let targetRelay = relayId;
+            if (relayType) targetRelay = POND_RELAY_MAP[activePond][relayType];
+
+            const originalText = btnElement.innerHTML;
+            btnElement.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG GỬI LỆNH...';
+            btnElement.disabled = true;
+
+            const url = `${PROXY_URL}?action=set_command&device_id=${DEVICE_ID}&relay_id=${targetRelay}&target_state=${state}`;
+            
+            fetch(url)
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === "SUCCESS") {
+                        btnElement.innerHTML = '<i class="fa-solid fa-check-circle"></i> ĐÃ THỰC THI';
+                        btnElement.classList.replace('bg-sky-600', 'bg-emerald-500');
+                        btnElement.classList.replace('hover:bg-sky-700', 'hover:bg-emerald-600');
+                        if (relayType && document.getElementById(`chk-relay-${relayType}`)) {
+                            document.getElementById(`chk-relay-${relayType}`).checked = (state === 1);
+                        }
+                    } else {
+                        btnElement.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i> LỖI GỬI LỆNH';
+                        btnElement.classList.replace('bg-sky-600', 'bg-rose-500');
+                    }
+                })
+                .catch(err => {
+                    btnElement.innerHTML = '<i class="fa-solid fa-wifi"></i> LỖI KẾT NỐI';
+                    btnElement.classList.replace('bg-sky-600', 'bg-slate-500');
+                })
+                .finally(() => {
+                    setTimeout(() => {
+                        btnElement.innerHTML = originalText; btnElement.disabled = false;
+                        btnElement.className = "mt-2 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-[10px] font-bold rounded-lg shadow-sm transition-all flex items-center gap-1.5 w-fit active:scale-95";
+                    }, 3000);
+                });
+        }
+
+        function runLocalAIAssistant(currentPh, currentTemp, currentOrp, currentEc, historyData = []) {
+            let phDelta = 0; let ecTrend = 0;
+            
+            if (historyData && historyData.length > 5) {
+                const phValues = historyData.map(d => parseFloat(d.ph)).filter(v => !isNaN(v));
+                const ecValues = historyData.map(d => parseFloat(d.ec)).filter(v => !isNaN(v));
+                if (phValues.length > 0) phDelta = Math.max(...phValues) - Math.min(...phValues);
+                if (ecValues.length > 5) {
+                    const pastEcAvg = ecValues.slice(1, 6).reduce((a, b) => a + b, 0) / 5;
+                    ecTrend = currentEc - pastEcAvg;
+                }
+            }
+
+            const dataFrame = { ph: currentPh, temp: currentTemp, orp: currentOrp, ec: currentEc, phDelta: phDelta, ecTrend: ecTrend };
+            let aiFindings = [];
+            
+            WioTAquacultureBrain.rules.forEach(rule => {
+                if (rule.check(dataFrame)) {
+                    let actionBtnHtml = "";
+                    if (rule.smartAction) {
+                        const rType = rule.smartAction.relayType ? `'${rule.smartAction.relayType}'` : null;
+                        const rId = rule.smartAction.relayId ? `'${rule.smartAction.relayId}'` : null;
+                        actionBtnHtml = `
+                            <button onclick="executeAICommand(${rType}, ${rId}, ${rule.smartAction.state}, this)" class="mt-2 px-3 py-1.5 bg-sky-600 hover:bg-sky-700 text-white text-[10px] font-bold rounded-lg shadow-sm transition-all flex items-center gap-1.5 w-fit active:scale-95">
+                                <i class="fa-solid fa-bolt"></i> THỰC THI AI: ${rule.smartAction.btnLabel}
+                            </button>
+                        `;
+                    }
+
+                    aiFindings.push(`
+                        <div class="mb-3 border-b border-rose-100 pb-3 last:border-0 last:pb-0 last:mb-0">
+                            <p class="text-[11px] text-rose-700 font-bold mb-1.5 leading-snug"><i class="fa-solid fa-triangle-exclamation mr-1"></i> ${rule.diagnosis}</p>
+                            <div class="bg-white p-2 rounded-xl border border-slate-100">
+                                <p class="text-[11px] text-slate-700 font-medium leading-relaxed"><i class="fa-solid fa-user-doctor text-sky-600 mr-1"></i> ${rule.actionText}</p>
+                                ${actionBtnHtml}
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+
+            const gridContainer = document.getElementById('monitor-cards-grid');
+            let aiHtml = "";
+
+            if (aiFindings.length === 0) {
+                aiHtml = `
+                    <div class="mt-4 rounded-2xl p-4 border shadow-sm bg-emerald-50 border-emerald-200 animate-fade-in">
+                        <div class="flex items-center mb-2">
+                            <div class="p-1.5 bg-emerald-100 rounded-lg mr-2"><i class="fa-solid fa-check-double text-emerald-600"></i></div>
+                            <h4 class="font-black text-slate-800 uppercase tracking-wide text-xs">TRỢ LÝ AI: MÔI TRƯỜNG ỔN ĐỊNH</h4>
+                        </div>
+                        <p class="text-[11px] text-slate-600 font-medium leading-relaxed">Tuyệt vời! Các chỉ số (pH: ${dataFrame.ph}, Temp: ${dataFrame.temp}°C) đều nằm trong ngưỡng an toàn sinh học. Khuyến nghị duy trì lượng thức ăn và sục khí hiện tại.</p>
+                    </div>
+                `;
+            } else {
+                aiHtml = `
+                    <div class="mt-4 rounded-2xl p-4 border shadow-sm bg-rose-50 border-rose-200 animate-fade-in">
+                        <div class="flex items-center mb-3">
+                            <div class="p-1.5 bg-rose-200 rounded-lg mr-2"><i class="fa-solid fa-robot text-rose-700 animate-bounce"></i></div>
+                            <h4 class="font-black text-rose-800 uppercase tracking-wide text-xs">AI KHUYẾN NGHỊ HÀNH ĐỘNG</h4>
+                        </div>
+                        <div class="space-y-1">${aiFindings.join('')}</div>
+                    </div>
+                `;
+            }
+
+            let existingAiPanel = document.getElementById('ai-local-panel');
+            if (existingAiPanel) existingAiPanel.outerHTML = `<div id="ai-local-panel">${aiHtml}</div>`;
+            else gridContainer.insertAdjacentHTML('afterend', `<div id="ai-local-panel">${aiHtml}</div>`);
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             document.getElementById('header-device-id').innerText = DEVICE_ID;
             const pondParam = urlParams.get('pond');
@@ -358,24 +530,6 @@
             setInterval(fetchTelemetryData, 5000);
             setTimeout(loadHealthChart, 1000);
         });
-
-        function verifyOwnerPin() {
-            const inputVal = document.getElementById('pin-input').value;
-            const errorMsg = document.getElementById('pin-error-msg');
-            if (inputVal === String(OWNER_PIN).trim()) {
-                isControlUnlocked = true;
-                document.getElementById('pin-lock-screen').classList.add('hidden');
-                document.getElementById('unlocked-control-panel').classList.remove('hidden');
-                document.getElementById('pin-input').value = "";
-                errorMsg.classList.add('opacity-0');
-            } else {
-                errorMsg.classList.remove('opacity-0');
-                document.getElementById('pin-input').value = "";
-                const inputBox = document.getElementById('pin-input');
-                inputBox.classList.add('border-rose-500');
-                setTimeout(() => inputBox.classList.remove('border-rose-500'), 1000);
-            }
-        }
 
         // --- HÀM XỬ LÝ MODAL ĐỔI PIN ---
         function openChangePinModal() {
@@ -442,7 +596,7 @@
             document.getElementById('dash-pond-title').innerText = pondInfo.name;
             document.getElementById('monitor-cards-grid').innerHTML = '<div class="col-span-2 text-center text-gray-400 py-10"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Đang tải dữ liệu...</div>';
             
-            const aiPanel = document.getElementById('ai-insight-panel'); if (aiPanel) aiPanel.remove();
+            const aiPanel = document.getElementById('ai-local-panel'); if (aiPanel) aiPanel.remove();
 
             document.getElementById('ctrl-section-title').children[0].innerText = `THIẾT BỊ DÀNH RIÊNG CHO ${pondInfo.name}`;
             document.getElementById('label-relay-van').innerText = `Van Điện ${pondInfo.name} (${pondInfo.van})`;
@@ -499,7 +653,6 @@
                 const response = await fetch(url);
                 const data = await response.json();
                 
-                // HIỂN THỊ LỖI LÊN UI NẾU BACKEND TỪ CHỐI
                 if (data.status === "ERROR") {
                     document.getElementById('monitor-cards-grid').innerHTML = `
                         <div class="col-span-2 text-center text-rose-600 py-8 bg-rose-50 rounded-2xl border border-rose-200">
@@ -544,18 +697,8 @@
 
                     document.getElementById('monitor-cards-grid').innerHTML = phCard + orpCard + ecCard + tempCard;
 
-                    let aiTitle = "Môi trường ổn định", aiMessage = "Các chỉ số đều nằm trong ngưỡng an toàn ASC/BAP. Tiếp tục duy trì lượng thức ăn và sục khí hiện tại.", aiIcon = "fa-solid fa-check-circle text-emerald-500", aiBg = "bg-emerald-50 border-emerald-200";
-
-                    if (isPhBad || isOrpBad || isEcBad || isTempBad) {
-                        aiTitle = "Cảnh báo rủi ro từ AI"; aiIcon = "fa-solid fa-robot text-amber-600 animate-bounce"; aiBg = "bg-amber-50 border-amber-300";
-                        if (ph > 8.5 && temp > 32) { aiMessage = "CẢNH BÁO KÉP: Nhiệt độ và pH đều rất cao. Nguy cơ khí độc NH3 bùng phát. Bật 100% dàn quạt và xả bớt nước tầng mặt."; aiBg = "bg-rose-50 border-rose-300"; aiIcon = "fa-solid fa-triangle-exclamation text-rose-600 animate-pulse"; } 
-                        else if (orp < 150) { aiMessage = "CẢNH BÁO ĐÁY AO: ORP tụt quá thấp, đáy ao tích tụ khí độc yếm khí. Tăng cường xiphong xả đáy và bổ sung vi sinh."; aiBg = "bg-rose-50 border-rose-300"; aiIcon = "fa-solid fa-triangle-exclamation text-rose-600 animate-pulse"; } 
-                        else { aiMessage = "Chỉ số đang vi phạm ngưỡng chuẩn. Hãy kiểm tra chi tiết các thẻ báo đỏ để can thiệp kịp thời."; }
-                    }
-
-                    const aiPanelHTML = `<div class="mt-4 rounded-2xl p-4 border shadow-sm ${aiBg}"><div class="flex items-center mb-2"><i class="${aiIcon} text-xl mr-2"></i><h4 class="font-black text-slate-800 uppercase tracking-wide text-xs">${aiTitle}</h4></div><p class="text-xs text-slate-700 leading-relaxed font-medium">${aiMessage}</p></div>`;
-                    let existingAiPanel = document.getElementById('ai-insight-panel');
-                    if (existingAiPanel) existingAiPanel.outerHTML = `<div id="ai-insight-panel">${aiPanelHTML}</div>`; else document.getElementById('monitor-cards-grid').insertAdjacentHTML('afterend', `<div id="ai-insight-panel">${aiPanelHTML}</div>`);
+                    // Khởi chạy Trợ lý AI Cục bộ (Kích hoạt TinyML & Knowledge Graph)
+                    runLocalAIAssistant(ph, temp, orp, ec, []);
                 }
             } catch (error) { 
                 console.error("Lỗi fetchTelemetryData:", error); 
