@@ -27,25 +27,31 @@
 </head>
 <body class="bg-slate-100 text-slate-800 pb-24 select-none">
 
+    <!-- HEADER & CHỌN AO NUÔI -->
     <header class="bg-sky-700 text-white p-4 sticky top-0 z-50 shadow-md">
         <div class="flex justify-between items-center mb-3">
-            <div class="flex items-center space-x-2">
-                <i class="fa-solid fa-water text-2xl text-sky-300"></i>
-                <div>
-                    <h1 class="font-black text-lg leading-none tracking-wide">WioT</h1>
-                    <span id="header-device-id" class="text-[11px] font-mono font-bold text-sky-200 tracking-wider">LOADING...</span>
-                </div>
+            
+            <!-- GÓC TRÁI: LOGO THƯƠNG HIỆU -->
+            <div class="flex items-center">
+                <img src="./cover.png" alt="WioT Logo" class="h-8 object-contain">
             </div>
-            <span id="connection-status" class="bg-emerald-500 text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 font-bold">
-                <span class="w-2 h-2 bg-white rounded-full animate-ping"></span> ONLINE
-            </span>
+            
+            <!-- GÓC PHẢI: TRẠNG THÁI & DEVICE ID -->
+            <div class="flex flex-col items-end">
+                <span id="connection-status" class="bg-emerald-500 text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 font-bold mb-1 shadow-inner">
+                    <span class="w-2 h-2 bg-white rounded-full animate-ping"></span> ONLINE
+                </span>
+                <span id="header-device-id" class="text-[10px] font-mono font-semibold text-sky-200 tracking-wider">LOADING...</span>
+            </div>
+            
         </div>
 
+        <!-- THANH CHỌN AO NUÔI -->
         <div class="bg-sky-800/80 p-1.5 rounded-xl border border-sky-600/50 flex items-center justify-between">
             <label for="pond-select" class="text-xs font-bold text-sky-100 pl-2 flex items-center gap-1.5">
                 <i class="fa-solid fa-fish text-sky-300"></i> CHỌN AO NUÔI:
             </label>
-            <select id="pond-select" onchange="changeActivePond(this.value)" class="bg-slate-900 text-sky-300 font-black text-xs px-3 py-1.5 rounded-lg border border-sky-500 focus:outline-none cursor-pointer">
+            <select id="pond-select" onchange="changeActivePond(this.value)" class="bg-slate-900 text-sky-300 font-black text-xs px-3 py-1.5 rounded-lg border border-sky-500 focus:outline-none cursor-pointer transition">
                 <option value="1">AO NUÔI 1</option>
                 <option value="2">AO NUÔI 2</option>
                 <option value="3">AO NUÔI 3</option>
