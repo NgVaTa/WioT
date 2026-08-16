@@ -17,8 +17,6 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    
-    <!-- THƯ VIỆN VẼ BIỂU ĐỒ -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     
     <style>
@@ -26,23 +24,18 @@
         .tab-btn.active { color: #0284c7; border-bottom: 3px solid #0284c7; font-weight: 700; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
-        
-        /* Ẩn icon con mắt mặc định để căn giữa mã PIN */
         input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }
         input[type="password"]::-webkit-contacts-auto-fill-button, input[type="password"]::-webkit-credentials-auto-fill-button { visibility: hidden; pointer-events: none; position: absolute; right: 0; }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 pb-24 select-none">
 
-    <!-- HEADER & CHỌN AO NUÔI -->
+    <!-- HEADER -->
     <header class="bg-sky-700 text-white p-4 sticky top-0 z-50 shadow-md">
         <div class="flex justify-between items-center mb-3">
-            <!-- GÓC TRÁI: LOGO -->
             <div class="flex items-center justify-start h-10 w-36 overflow-hidden flex-shrink-0">
                 <img src="./cover.png" alt="WioT Logo" class="w-full h-auto transform scale-[1.0] origin-center object-contain">
             </div>
-            
-            <!-- GÓC PHẢI: TRẠNG THÁI -->
             <div class="flex flex-col items-end">
                 <span id="connection-status" class="bg-emerald-500 text-white text-[10px] px-2.5 py-1 rounded-full flex items-center gap-1 font-bold mb-1 shadow-inner">
                     <span class="w-2 h-2 bg-white rounded-full animate-ping"></span> ONLINE
@@ -66,7 +59,7 @@
 
     <main class="max-w-md mx-auto p-4 space-y-4">
         
-        <!-- TAB 1: GIÁM SÁT & BIỂU ĐỒ AI -->
+        <!-- TAB 1: GIÁM SÁT -->
         <section id="tab-dashboard" class="tab-content space-y-4">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                 <div>
@@ -91,7 +84,7 @@
                 </div>
             </div>
 
-            <!-- KHỐI BIỂU ĐỒ PHÂN TÍCH -->
+            <!-- KHỐI BIỂU ĐỒ PHÂN TÍCH (ĐÃ TỐI ƯU UX) -->
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 mt-4">
                 <div class="flex justify-between items-center mb-4">
                     <div class="flex items-center">
@@ -103,7 +96,7 @@
                     </button>
                 </div>
                 
-                <div class="relative w-full h-48">
+                <div class="relative w-full h-56">
                     <canvas id="healthChart"></canvas>
                 </div>
             </div>
@@ -116,7 +109,7 @@
                 <div class="inline-block p-4 bg-sky-50 text-sky-600 rounded-full mb-4">
                     <i class="fa-solid fa-lock text-4xl"></i>
                 </div>
-                <h3 class="text-lg font-black text-slate-800 uppercase tracking-wide">Xác thực Chủ Ao nuôi</h3>
+                <h3 class="text-lg font-black text-slate-800 uppercase tracking-wide">Xác thực Chủ Đầm</h3>
                 <p class="text-[13px] text-slate-500 mt-2 mb-6 font-medium">Vui lòng nhập mã PIN 4 số để mở khóa Trung tâm điều khiển thiết bị WioT.</p>
                 <div class="flex justify-center mb-5">
                     <input type="password" id="pin-input" inputmode="numeric" maxlength="4" placeholder="••••" 
@@ -284,7 +277,7 @@
 
     <!-- LOGIC SCRIPT -->
     <script>
-        const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev/"; // <<< THAY LINK APPS SCRIPT CỦA BẠN VÀO ĐÂY
+        const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev/"; // <<< THAY LINK APPS SCRIPT VÀO ĐÂY
         
         const urlParams = new URLSearchParams(window.location.search);
         let scannedDevice = urlParams.get('device');
@@ -399,6 +392,9 @@
             new QRCode(qrContainer, { text: passportURL, width: 150, height: 150, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H });
         }
 
+        // ==========================================
+        // VẼ BIỂU ĐỒ BẰNG CHART.JS (ĐÃ TỐI ƯU TRỤC Y)
+        // ==========================================
         async function loadHealthChart() {
             const btn = document.getElementById('btn-load-chart');
             btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẢI';
@@ -447,10 +443,24 @@
                             responsive: true,
                             maintainAspectRatio: false,
                             interaction: { mode: 'index', intersect: false },
-                            plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
+                            plugins: { 
+                                legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } 
+                            },
                             scales: {
-                                y: { type: 'linear', display: true, position: 'left', title: { display: true, text: 'pH', font: { size: 10 } } },
-                                y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, title: { display: true, text: 'Nhiệt độ', font: { size: 10 } } }
+                                // Khóa khung pH từ 7 đến 9, đổi màu chữ khớp với màu dây line
+                                y: { 
+                                    type: 'linear', display: true, position: 'left', 
+                                    suggestedMin: 7.0, suggestedMax: 9.0,
+                                    title: { display: true, text: 'pH', font: { size: 10, weight: 'bold' }, color: '#1ea6d9' },
+                                    ticks: { color: '#1ea6d9' }
+                                },
+                                // Khóa khung Nhiệt độ từ 24 đến 34, đổi màu chữ khớp với màu dây line
+                                y1: { 
+                                    type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, 
+                                    suggestedMin: 24.0, suggestedMax: 34.0,
+                                    title: { display: true, text: 'Nhiệt độ (°C)', font: { size: 10, weight: 'bold' }, color: '#ef4444' },
+                                    ticks: { color: '#ef4444' }
+                                }
                             }
                         }
                     });
@@ -458,7 +468,7 @@
             } catch (err) {
                 console.error("Lỗi vẽ biểu đồ:", err);
             } finally {
-                btn.innerHTML = '<i class="fa-solid fa-rotate"></i> LÀM MỚI';
+                btn.innerHTML = '<i class="fa-solid fa-rotate"></i> TẢI LẠI';
             }
         }
 
