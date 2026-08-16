@@ -313,7 +313,7 @@
 
     <!-- LOGIC SCRIPT -->
     <script>
-        const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev/"; // <<< THAY LINK APPS SCRIPT VÀO ĐÂY
+        const PROXY_URL = "YOUR_GOOGLE_APPS_SCRIPT_URL"; // <<< THAY LINK APPS SCRIPT VÀO ĐÂY
         
         const urlParams = new URLSearchParams(window.location.search);
         let scannedDevice = urlParams.get('device');
@@ -377,7 +377,7 @@
             }
         }
 
-        // --- CÁC HÀM XỬ LÝ MODAL ĐỔI PIN ---
+        // --- HÀM XỬ LÝ MODAL ĐỔI PIN ---
         function openChangePinModal() {
             document.getElementById('modal-change-pin').classList.remove('hidden');
             document.getElementById('cp-old').value = ""; document.getElementById('cp-new').value = ""; document.getElementById('cp-confirm').value = "";
@@ -499,6 +499,19 @@
                 const response = await fetch(url);
                 const data = await response.json();
                 
+                // HIỂN THỊ LỖI LÊN UI NẾU BACKEND TỪ CHỐI
+                if (data.status === "ERROR") {
+                    document.getElementById('monitor-cards-grid').innerHTML = `
+                        <div class="col-span-2 text-center text-rose-600 py-8 bg-rose-50 rounded-2xl border border-rose-200">
+                            <i class="fa-solid fa-triangle-exclamation text-3xl mb-3"></i><br>
+                            <span class="font-bold text-sm leading-snug block px-4">${data.message}</span>
+                        </div>
+                    `;
+                    const chartBtn = document.getElementById('btn-load-chart');
+                    if(chartBtn) chartBtn.innerHTML = '<i class="fa-solid fa-rotate"></i> LỖI DỮ LIỆU';
+                    return;
+                }
+                
                 if (data.owner_pin) OWNER_PIN = data.owner_pin;
 
                 const pondKey = `pond${activePond}`;
@@ -544,7 +557,10 @@
                     let existingAiPanel = document.getElementById('ai-insight-panel');
                     if (existingAiPanel) existingAiPanel.outerHTML = `<div id="ai-insight-panel">${aiPanelHTML}</div>`; else document.getElementById('monitor-cards-grid').insertAdjacentHTML('afterend', `<div id="ai-insight-panel">${aiPanelHTML}</div>`);
                 }
-            } catch (error) { console.error("Lỗi fetchTelemetryData:", error); }
+            } catch (error) { 
+                console.error("Lỗi fetchTelemetryData:", error); 
+                document.getElementById('monitor-cards-grid').innerHTML = `<div class="col-span-2 text-center text-rose-500 py-10 font-bold"><i class="fa-solid fa-wifi text-2xl mb-2"></i><br>Lỗi kết nối máy chủ!</div>`;
+            }
         }
 
         function toggleManualMode1Way() {
