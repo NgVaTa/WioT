@@ -116,6 +116,7 @@
                            class="w-48 text-center text-2xl font-black tracking-[0.5em] p-4 bg-slate-50 border-2 border-slate-200 rounded-2xl focus:border-sky-500 focus:outline-none transition-all placeholder:text-slate-300 placeholder:tracking-normal">
                 </div>
                 <p id="pin-error-msg" class="text-rose-500 text-xs font-bold mb-4 opacity-0 transition-opacity">Mã PIN không chính xác!</p>
+                <!-- NÚT BẤM ĐÃ ĐƯỢC PHỤC HỒI HÀM BẮT SỰ KIỆN -->
                 <button onclick="verifyOwnerPin()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 rounded-xl shadow-md transition duration-300 flex items-center justify-center gap-2">
                     <i class="fa-solid fa-unlock-keyhole"></i> MỞ KHÓA HỆ THỐNG
                 </button>
@@ -531,6 +532,25 @@
             setTimeout(loadHealthChart, 1000);
         });
 
+        // --- HÀM XÁC THỰC VÀ MỞ KHÓA BẢO MẬT (ĐÃ KHÔI PHỤC) ---
+        function verifyOwnerPin() {
+            const inputVal = document.getElementById('pin-input').value;
+            const errorMsg = document.getElementById('pin-error-msg');
+            if (inputVal === String(OWNER_PIN).trim()) {
+                isControlUnlocked = true;
+                document.getElementById('pin-lock-screen').classList.add('hidden');
+                document.getElementById('unlocked-control-panel').classList.remove('hidden');
+                document.getElementById('pin-input').value = "";
+                errorMsg.classList.add('opacity-0');
+            } else {
+                errorMsg.classList.remove('opacity-0');
+                document.getElementById('pin-input').value = "";
+                const inputBox = document.getElementById('pin-input');
+                inputBox.classList.add('border-rose-500');
+                setTimeout(() => inputBox.classList.remove('border-rose-500'), 1000);
+            }
+        }
+
         // --- HÀM XỬ LÝ MODAL ĐỔI PIN ---
         function openChangePinModal() {
             document.getElementById('modal-change-pin').classList.remove('hidden');
@@ -697,104 +717,12 @@
 
                     document.getElementById('monitor-cards-grid').innerHTML = phCard + orpCard + ecCard + tempCard;
 
-                    // Khởi chạy Trợ lý AI Cục bộ (Kích hoạt TinyML & Knowledge Graph)
                     runLocalAIAssistant(ph, temp, orp, ec, []);
                 }
             } catch (error) { 
                 console.error("Lỗi fetchTelemetryData:", error); 
                 document.getElementById('monitor-cards-grid').innerHTML = `<div class="col-span-2 text-center text-rose-500 py-10 font-bold"><i class="fa-solid fa-wifi text-2xl mb-2"></i><br>Lỗi kết nối máy chủ!</div>`;
             }
-        }
-
-        function toggleManualMode1Way() {
-            isManualMode = !isManualMode;
-            const btn = document.getElementById('btn-manual-toggle'), iconBox = document.getElementById('manual-icon-box'), icon = document.getElementById('manual-icon'), title = document.getElementById('manual-status-title'), desc = document.getElementById('manual-status-desc'), badge = document.getElementById('manual-badge'), panelContainer = document.getElementById('control-panel-container');
-
-            if (isManualMode) {
-                btn.className = "cursor-pointer bg-amber-50/90 p-4 rounded-2xl shadow-sm border-2 border-amber-400/80 transition-all duration-200 flex items-center justify-between"; iconBox.className = "p-3 bg-amber-100 text-amber-600 rounded-xl transition-all"; icon.className = "fa-solid fa-hand-pointer text-xl animate-bounce"; title.innerText = "CHẾ ĐỘ THỦ CÔNG"; title.className = "font-black text-sm text-amber-900"; desc.innerText = "Đã mở khóa điều khiển"; desc.className = "text-[11px] text-amber-700 font-medium"; badge.innerText = "MANUAL"; badge.className = "px-2.5 py-1 bg-amber-500 text-white text-[10px] font-black rounded-lg shadow-sm uppercase tracking-wider"; panelContainer.className = "opacity-100 pointer-events-auto transition-all duration-300 space-y-4"; send1WayCommand('LB100', 0);
-            } else {
-                btn.className = "cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 transition-all duration-200 flex items-center justify-between"; iconBox.className = "p-3 bg-slate-100 text-slate-500 rounded-xl transition-all"; icon.className = "fa-solid fa-robot text-xl"; title.innerText = "CHẾ ĐỘ TỰ ĐỘNG"; title.className = "font-bold text-sm text-slate-800"; desc.innerText = "Chạm để bật điều khiển thủ công"; desc.className = "text-[11px] text-slate-400"; badge.innerText = "AUTO"; badge.className = "px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-lg border border-slate-200 uppercase tracking-wider"; panelContainer.className = "opacity-50 pointer-events-none transition-all duration-300 space-y-4"; send1WayCommand('LB100', 1);
-            }
-        }
-
-        function toggleCommonRelay1Way(relayId) {
-            commonRelayStates[relayId] = commonRelayStates[relayId] === 1 ? 0 : 1; const newState = commonRelayStates[relayId]; const btn = document.getElementById(`btn-relay-${relayId}`), statusText = document.getElementById(`status-${relayId}`), icon = document.getElementById(`icon-${relayId}`);
-            if (newState === 1) { btn.className = "p-3 bg-emerald-500 border border-emerald-600 shadow-md rounded-xl font-bold text-white text-left flex justify-between items-center transition-all"; statusText.innerText = "ĐANG BẬT (ON)"; statusText.className = "text-[9px] text-emerald-100 font-bold"; icon.className = "fa-solid fa-power-off text-white text-base animate-pulse"; } 
-            else { btn.className = "p-3 bg-slate-50 hover:bg-slate-100 border border-slate-200 rounded-xl font-bold text-slate-700 text-left flex justify-between items-center transition-all"; statusText.innerText = "ĐANG TẮT"; statusText.className = "text-[9px] text-slate-400 font-normal"; icon.className = "fa-solid fa-power-off text-slate-400 text-base"; }
-            send1WayCommand(relayId, newState);
-        }
-
-        function triggerRelay1Way(type, isChecked) { send1WayCommand(POND_RELAY_MAP[activePond][type], isChecked ? 1 : 0); }
-        function send1WayCommand(relayId, state) { if (isGuestMode || !isControlUnlocked) return; const url = `${PROXY_URL}?action=set_command&device_id=${DEVICE_ID}&relay_id=${relayId}&target_state=${state}`; fetch(url).catch(err => console.log("Lệnh phát đi:", relayId, state)); }
-
-        async function updatePassportUI() {
-            const pondNameEl = document.getElementById('ui-passport-pond'); if(pondNameEl) pondNameEl.innerText = `AO NUÔI ${activePond}`;
-            const wqiEl = document.getElementById('ui-passport-wqi'), gradeEl = document.getElementById('ui-passport-grade'), badgeEl = document.getElementById('ui-passport-badge'), descEl = document.getElementById('ui-passport-desc'), diagEl = document.getElementById('ui-passport-diagnostics');
-            if (wqiEl) wqiEl.innerText = "--"; if (gradeEl) gradeEl.innerText = ""; if (diagEl) diagEl.classList.add('hidden');
-            if (badgeEl) { badgeEl.innerText = "ĐANG TẢI..."; badgeEl.className = "bg-slate-300 text-white font-bold py-2 px-4 rounded-lg text-xs text-center w-28 shadow-sm"; }
-
-            try {
-                const url = `${PROXY_URL}?action=get_passport&device_id=${DEVICE_ID}&pond=${activePond}`;
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (data.status === "SUCCESS") {
-                    const wqi = data.wqi_score; const latest = data.latest;
-                    if (wqiEl) wqiEl.innerText = wqi;
-                    if (descEl) descEl.innerHTML = `Quét mã QR để truy xuất ${data.history ? data.history.length : 0} bản ghi gần nhất của ao nuôi này.<br>Tiêu chuẩn áp dụng: ASC / BAP.`;
-
-                    let grade = "", badgeText = "", badgeClass = "text-white font-bold py-2 px-4 rounded-lg text-xs text-center w-28 shadow-sm ";
-                    if (wqi >= 90) { grade = "(Hạng A+)"; badgeText = "XUẤT SẮC"; badgeClass += "bg-emerald-500"; wqiEl.className = "text-4xl font-black text-emerald-500"; } 
-                    else if (wqi >= 75) { grade = "(Hạng A)"; badgeText = "ĐẠT CHUẨN"; badgeClass += "bg-emerald-400"; wqiEl.className = "text-4xl font-black text-emerald-400"; } 
-                    else if (wqi >= 50) { grade = "(Hạng B)"; badgeText = "CẦN LƯU Ý"; badgeClass += "bg-amber-500"; wqiEl.className = "text-4xl font-black text-amber-500"; } 
-                    else { grade = "(Hạng C)"; badgeText = "NGUY HIỂM"; badgeClass += "bg-rose-500"; wqiEl.className = "text-4xl font-black text-rose-500"; }
-
-                    if (gradeEl) gradeEl.innerText = grade; if (badgeEl) { badgeEl.innerText = badgeText; badgeEl.className = badgeClass; }
-
-                    if (diagEl && latest) {
-                        let diagHTML = "";
-                        const ph = parseFloat(latest.ph) || 0, temp = parseFloat(latest.temp) || 0, orp = parseFloat(latest.orp) || 0, ec = parseFloat(latest.ec) || 0;
-                        if (ph < 7.0 || ph > 9.0) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>pH Nguy hiểm (${ph})</span>`; else if (ph < 7.5 || ph > 8.5) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-circle-exclamation mr-1"></i>pH Khá xấu (${ph})</span>`;
-                        if (temp < 24 || temp > 34) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-temperature-arrow-up mr-1"></i>Nhiệt độ Sốc (${temp}°C)</span>`; else if (temp < 26 || temp > 32) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-temperature-half mr-1"></i>Nhiệt độ Bất lợi (${temp}°C)</span>`;
-                        if (orp < 150) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-skull-crossbones mr-1"></i>Đáy ao độc hại (${orp}mV)</span>`; else if (orp < 200) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-water mr-1"></i>Đáy ao bẩn (${orp}mV)</span>`;
-                        if (ec < 5 || ec > 35) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-droplet mr-1"></i>Độ mặn Sốc (${ec}ppt)</span>`; else if (ec < 10 || ec > 30) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-droplet mr-1"></i>Độ mặn Bất lợi (${ec}ppt)</span>`;
-                        if (diagHTML === "") diagHTML = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-check-circle mr-1"></i>Các chỉ số sinh hóa lý tưởng</span>`;
-                        diagEl.innerHTML = diagHTML; diagEl.classList.remove('hidden');
-                    }
-                }
-            } catch (error) { console.error("Lỗi updatePassportUI:", error); }
-        }
-
-        async function downloadCertificatePDF(btnElement) {
-            const originalText = btnElement.innerHTML; btnElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẠO PDF...`; btnElement.disabled = true;
-            try {
-                const url = `${PROXY_URL}?action=get_passport&device_id=${DEVICE_ID}&pond=${activePond}`;
-                const response = await fetch(url); const data = await response.json();
-                if (data.status !== "SUCCESS" || !data.history || data.history.length === 0) { alert(`Không thể xuất chứng thư!\n\nChi tiết: ${data.status}`); return; }
-
-                const wqiColor = data.wqi_score >= 70 ? '#10b981' : '#f59e0b'; const wqiText = data.wqi_score >= 70 ? 'ĐẠT CHUẨN XUẤT KHẨU' : 'CẦN CẢI THIỆN MÔI TRƯỜNG';
-                const ROWS_PER_PAGE = 20; const chunks = [];
-                for (let i = 0; i < data.history.length; i += ROWS_PER_PAGE) chunks.push(data.history.slice(i, i + ROWS_PER_PAGE));
-
-                const appendixPagesHTML = chunks.map((chunk, chunkIndex) => {
-                    const rowsHTML = chunk.map((row, index) => `
-                        <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f8fafc'}; border-bottom: 1px solid #e2e8f0; page-break-inside: avoid;">
-                            <td style="padding: 12px; text-align: center; font-size: 13px; color: #475569;">${row.timestamp}</td><td style="padding: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #1ea6d9;">${row.ph}</td><td style="padding: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #d97706;">${row.ec}</td><td style="padding: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #8b5cf6;">${row.orp}</td><td style="padding: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #ef4444;">${row.temp}</td>
-                        </tr>`).join('');
-                    const pageHeaderHTML = chunkIndex === 0 ? `<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #003882; padding-bottom: 15px; margin-bottom: 25px;"><div><h2 style="font-size: 22px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 0;">PHỤ LỤC: NHẬT KÝ QUAN TRẮC MÔI TRƯỜNG</h2><p style="font-size: 13px; color: #64748b; margin: 6px 0 0 0;">Trích xuất ${data.history.length} bản ghi gần nhất. (Trang ${chunkIndex + 1}/${chunks.length})</p></div><img src="./logo.png" style="width: 140px; height: auto;"></div>` : `<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #003882; padding-bottom: 10px; margin-bottom: 20px;"><h2 style="font-size: 16px; font-weight: bold; color: #003882; text-transform: uppercase; margin: 0;">PHỤ LỤC (TIẾP THEO) - TRANG ${chunkIndex + 1}/${chunks.length}</h2><img src="./logo.png" style="width: 100px; height: auto;"></div>`;
-                    return `<div class="html2pdf__page-break"></div><div style="width: 794px; height: 1122px; padding: 40px; box-sizing: border-box; background: white;">${pageHeaderHTML}<table style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden;"><thead><tr style="background: #003882;"><th style="padding: 14px; text-align: center; font-size: 13px; font-weight: bold; color: white;">Thời gian quét</th><th style="padding: 14px; text-align: center; font-size: 13px; font-weight: bold; color: white;">Độ pH</th><th style="padding: 14px; text-align: center; font-size: 13px; font-weight: bold; color: white;">Độ mặn EC (ppt)</th><th style="padding: 14px; text-align: center; font-size: 13px; font-weight: bold; color: white;">Chỉ số ORP (mV)</th><th style="padding: 14px; text-align: center; font-size: 13px; font-weight: bold; color: white;">Nhiệt độ (°C)</th></tr></thead><tbody>${rowsHTML}</tbody></table></div>`;
-                }).join('');
-
-                const pdfHTML = `<div id="print-wrapper" style="width: 794px; background: white; font-family: 'Segoe UI', Arial, sans-serif; margin: 0; padding: 0;"><div style="width: 794px; height: 1122px; padding: 40px; box-sizing: border-box; position: relative;"><div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0.04; z-index: 0;"><img src="./logo.png" style="width: 550px; height: auto;"></div><div style="position: relative; z-index: 1; border: 3px solid #003882; padding: 4px; box-sizing: border-box; height: 100%;"><div style="border: 1px solid #1ea6d9; padding: 50px 40px; text-align: center; height: 100%; display: flex; flex-direction: column; align-items: center; background: linear-gradient(to bottom, #ffffff, #f4f9ff); box-sizing: border-box;"><img src="./logo.png" style="width: 320px; height: auto; margin-bottom: 20px;"><h1 style="font-size: 34px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 10px 0 5px 0;">CHỨNG THƯ CHẤT LƯỢNG NƯỚC</h1><h2 style="font-size: 26px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 0 0 5px 0;">THỦY SẢN</h2><p style="font-size: 14px; color: #1ea6d9; font-weight: bold; letter-spacing: 2px; text-transform: uppercase; margin-top: 5px;">Water Quality Certificate</p><hr style="width: 100px; border: 2px solid #1ea6d9; margin: 30px auto;"><p style="font-size: 18px; color: #334155; margin: 15px 0;">Mã thiết bị giám sát: <span style="font-weight: bold; color: #003882;">${DEVICE_ID}</span></p><p style="font-size: 18px; color: #334155; margin: 15px 0;">Khu vực quan trắc: <span style="font-weight: bold; color: #003882;">AO NUÔI ${activePond}</span></p><p style="font-size: 15px; color: #64748b; margin: 15px 0;">Ngày trích xuất: <span style="font-weight: bold;">${new Date().toLocaleDateString('vi-VN')}</span></p><div style="margin: 40px auto; padding: 40px 30px; background: white; border-radius: 12px; box-shadow: 0 10px 25px rgba(0, 56, 130, 0.08); width: 70%; border-top: 5px solid #1ea6d9;"><p style="font-size: 15px; font-weight: bold; color: #64748b; margin-bottom: 20px;">CHỈ SỐ CHẤT LƯỢNG NƯỚC TỔNG HỢP (WQI)</p><p style="font-size: 80px; font-weight: 900; color: #003882; margin: 0; line-height: 1;">${data.wqi_score} <span style="font-size: 28px; color: #94a3b8;">/ 100</span></p><div style="display: inline-block; background: ${wqiColor}; color: white; padding: 12px 28px; border-radius: 50px; font-weight: bold; font-size: 16px; margin-top: 30px;">${wqiText}</div></div><div style="margin-top: auto;"><p style="font-size: 13px; font-style: italic; color: #64748b; line-height: 1.6; margin: 0 20px;">Chứng thư được cấp tự động bởi Hệ thống Quan trắc Nông nghiệp thông minh <strong>WioT AquaSense</strong>.<br>Dữ liệu được mã hóa điện tử vô thời hạn, không thể chỉnh sửa hay làm giả.</p></div></div></div></div>${appendixPagesHTML}</div>`;
-
-                const container = document.createElement('div'); container.innerHTML = pdfHTML; container.style.position = 'absolute'; container.style.top = '0'; container.style.left = '0'; container.style.width = '794px'; container.style.zIndex = '-9999'; container.style.opacity = '0'; container.style.pointerEvents = 'none'; document.body.appendChild(container);
-
-                await new Promise(resolve => setTimeout(resolve, 500));
-                const isMobile = window.innerWidth < 768;
-                const opt = { margin: 0, filename: `WioT_ChungThu_Ao${activePond}_${DEVICE_ID}.pdf`, image: { type: 'jpeg', quality: 0.98 }, pagebreak: { mode: ['css'] }, html2canvas: { scale: isMobile ? 1.5 : 2, useCORS: true, windowWidth: 794, width: 794, x: 0, y: 0, scrollX: 0, scrollY: 0, logging: false }, jsPDF: { unit: 'px', format: [794, 1123], orientation: 'portrait' } };
-
-                await html2pdf().set(opt).from(container.querySelector('#print-wrapper')).save(); document.body.removeChild(container);
-            } catch (error) { console.error("Lỗi xuất PDF:", error); alert("Đã xảy ra lỗi khi tạo chứng thư. Vui lòng kiểm tra lại kết nối mạng!"); } finally { btnElement.innerHTML = originalText; btnElement.disabled = false; }
         }
     </script>
 </body>
