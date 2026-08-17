@@ -623,32 +623,43 @@
         }
 
         // =========================================================================
-        // 🤖 LOGIC CHAT WioT AI GEN
+        // 🤖 LOGIC CHAT WioT AI GEN (ĐÃ CHUYỂN ĐỔI SANG REST API)
         // =========================================================================
-        function sendAIMessage() {
+        async function sendAIMessage() {
             const inputField = document.getElementById('userInput');
             const text = inputField.value.trim();
             if (!text) return;
 
+            // 1. Hiển thị tin nhắn của người dùng
             appendChat('user', text);
             inputField.value = '';
             
+            // 2. Vô hiệu hóa nút và hiện trạng thái Loading
             const sendBtn = document.getElementById('sendBtn');
             sendBtn.disabled = true;
             sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
 
-            google.script.run
-                .withSuccessHandler(function(response) {
-                    appendChat('ai', response);
-                    sendBtn.disabled = false;
-                    sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
-                })
-                .withFailureHandler(function(error) {
-                    appendChat('ai', '⚠️ Lỗi kết nối: ' + error.message);
-                    sendBtn.disabled = false;
-                    sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
-                })
-                .askGeminiFromWeb(text, DEVICE_ID);
+            try {
+                // 3. Đóng gói câu hỏi và gọi qua REST API (sử dụng encodeURIComponent để tránh lỗi font chữ)
+                const url = `${PROXY_URL}?action=ask_ai&device_id=${DEVICE_ID}&question=${encodeURIComponent(text)}`;
+                const response = await fetch(url);
+                const data = await response.json();
+
+                // 4. Hiển thị phản hồi từ Kỹ sư ảo
+                if (data.status === "SUCCESS") {
+                    appendChat('ai', data.answer);
+                } else {
+                    appendChat('ai', '⚠️ Máy chủ phản hồi lỗi: ' + (data.message || 'Không rõ nguyên nhân'));
+                }
+            } catch (err) {
+                // 5. Xử lý khi mất mạng hoặc timeout
+                appendChat('ai', '⚠️ Lỗi kết nối mạng: Không thể chạm tới Kỹ sư AI lúc này.');
+                console.error("AI Fetch Error:", err);
+            } finally {
+                // 6. Trả nút gửi về trạng thái ban đầu
+                sendBtn.disabled = false;
+                sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+            }
         }
 
         function appendChat(sender, text) {
