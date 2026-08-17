@@ -60,7 +60,7 @@
     <main class="max-w-md mx-auto p-4 space-y-4 relative">
         
         <!-- TAB 1: GIÁM SÁT -->
-        <section id="tab-dashboard" class="tab-content space-y-4">
+        <section id="tab-dashboard" class="tab-content space-y-4 animate-fade-in">
             <div class="bg-white p-4 rounded-2xl shadow-sm border border-slate-200 flex justify-between items-center">
                 <div>
                     <span class="text-[10px] text-slate-400 font-bold uppercase tracking-wider block">Đang theo dõi</span>
@@ -95,7 +95,6 @@
                         TẢI LẠI
                     </button>
                 </div>
-                
                 <div class="relative w-full h-56">
                     <canvas id="healthChart"></canvas>
                 </div>
@@ -103,8 +102,7 @@
         </section>
 
         <!-- TAB 2: ĐIỀU KHIỂN & BẢO MẬT -->
-        <section id="tab-control" class="tab-content space-y-4 hidden">
-            <!-- MÀN HÌNH KHÓA -->
+        <section id="tab-control" class="tab-content space-y-4 hidden animate-fade-in">
             <div id="pin-lock-screen" class="bg-white rounded-2xl p-8 shadow-sm border border-slate-200 text-center mt-6">
                 <div class="inline-block p-4 bg-sky-50 text-sky-600 rounded-full mb-4">
                     <i class="fa-solid fa-lock text-4xl"></i>
@@ -121,7 +119,6 @@
                 </button>
             </div>
 
-            <!-- BẢNG ĐIỀU KHIỂN -->
             <div id="unlocked-control-panel" class="hidden space-y-4 animate-fade-in">
                 <div id="btn-manual-toggle" onclick="toggleManualMode1Way()" class="cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 transition-all duration-200 flex items-center justify-between">
                     <div class="flex items-center space-x-3">
@@ -219,7 +216,6 @@
                         </div>
                     </div>
                     
-                    <!-- NÚT ĐỔI MÃ PIN TÍCH HỢP -->
                     <button onclick="openChangePinModal()" class="w-full mt-2 py-3 bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold text-xs rounded-xl transition shadow-sm flex items-center justify-center gap-2">
                         <i class="fa-solid fa-key"></i> ĐỔI MÃ PIN BẢO MẬT
                     </button>
@@ -228,7 +224,7 @@
         </section>
 
         <!-- TAB 3: HỘ CHIẾU SỐ & PDF -->
-        <section id="tab-passport" class="tab-content space-y-4 hidden">
+        <section id="tab-passport" class="tab-content space-y-4 hidden animate-fade-in">
             <div class="bg-white rounded-2xl p-5 shadow-md border border-slate-200 text-center space-y-4">
                 <div class="border-b pb-3">
                     <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase">VERIFIED DIGITAL PASSPORT</span>
@@ -260,6 +256,30 @@
                 <button onclick="downloadCertificatePDF(this)" class="w-full py-3 bg-sky-600 hover:bg-sky-700 text-white font-bold text-xs rounded-xl transition shadow flex items-center justify-center gap-2">
                     <i class="fa-solid fa-file-pdf"></i> TẢI CHỨNG THƯ CHẤT LƯỢNG (PDF)
                 </button>
+            </div>
+        </section>
+
+        <!-- TAB 4: TRỢ LÝ AI (WioT Local AI Gen) -->
+        <section id="tab-ai" class="tab-content space-y-4 hidden animate-fade-in" style="height: calc(100vh - 180px);">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden">
+                <div class="bg-sky-700 text-white p-3 text-center font-bold text-sm flex items-center justify-center gap-2 shadow-sm z-10">
+                    <i class="fa-solid fa-robot text-lg"></i> KỸ SƯ THỦY SẢN ẢO
+                </div>
+                
+                <div id="chatBox" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50">
+                    <div class="flex flex-col items-start">
+                        <div class="bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm max-w-[85%] shadow-sm leading-relaxed">
+                            Chào bạn! Tôi là WioT Assistant, một người bạn đồng hành và là Kỹ sư Thủy sản ảo tận tâm của bạn. Tôi có thể giúp gì cho bạn hôm nay?
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="p-3 bg-white border-t border-slate-200 flex items-center gap-2">
+                    <input type="text" id="userInput" placeholder="Hỏi tôi về kỹ thuật ao nuôi..." onkeypress="if(event.key === 'Enter') sendAIMessage()" class="flex-1 bg-slate-100 border border-slate-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-sky-500 focus:bg-white transition-all shadow-inner">
+                    <button id="sendBtn" onclick="sendAIMessage()" class="bg-sky-600 hover:bg-sky-700 text-white w-11 h-11 rounded-full flex items-center justify-center shadow-md transition-all shrink-0">
+                        <i class="fa-solid fa-paper-plane"></i>
+                    </button>
+                </div>
             </div>
         </section>
 
@@ -295,8 +315,8 @@
         </div>
     </main>
 
-    <!-- BOTTOM NAVIGATION -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-2 z-50">
+    <!-- BOTTOM NAVIGATION THÊM TAB AI -->
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn active flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500 transition">
             <i class="fa-solid fa-chart-line text-lg mb-0.5"></i>
             <span>GIÁM SÁT</span>
@@ -309,11 +329,15 @@
             <i class="fa-solid fa-qrcode text-lg mb-0.5"></i>
             <span>HỘ CHIẾU SỐ</span>
         </button>
+        <button onclick="switchTab('ai')" id="nav-ai" class="tab-btn flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500 transition">
+            <i class="fa-solid fa-robot text-lg mb-0.5"></i>
+            <span>AI GEN</span>
+        </button>
     </nav>
 
     <!-- LOGIC SCRIPT -->
     <script>
-        const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev/"; // <<< THAY LINK APPS SCRIPT VÀO ĐÂY
+        const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev/"; 
         
         const urlParams = new URLSearchParams(window.location.search);
         let scannedDevice = urlParams.get('device');
@@ -337,46 +361,15 @@
             "4": { name: "AO NUÔI 4", van: "Y3", quat: "Y13", xaday: "Y17" }
         };
 
-        // =========================================================================
-        // 🧠 WIOT LOCAL AI ENGINE - LITE VERSION (TƯ VẤN THUẦN TÚY)
-        // =========================================================================
         const WioTAquacultureBrain = {
             rules: [
-                {
-                    check: (data) => data.ph < 7.5,
-                    diagnosis: "Độ pH giảm mạnh (< 7.5). Môi trường axit hóa, tôm khó lột xác, khí độc H2S dễ bùng phát.",
-                    actionText: "Khuyến nghị: Đánh vôi (CaCO3/Dolomite) 15-20kg/1000m3. Bật 100% quạt nước để xua khí độc."
-                },
-                {
-                    check: (data) => data.ph > 8.5,
-                    diagnosis: "Độ pH tăng cao (> 8.5). Độc tính của khí NH3 tăng, gây ngạt và stress cho tôm.",
-                    actionText: "Khuyến nghị: Xả bớt nước tầng mặt, thay 20% nước mới. Giảm lượng thức ăn."
-                },
-                {
-                    check: (data) => data.temp < 25,
-                    diagnosis: "Nhiệt độ giảm đột ngột (< 25°C). Tôm giảm ăn, trao đổi chất chậm. Nguy cơ Đốm trắng.",
-                    actionText: "Khuyến nghị: Giảm 30-50% lượng thức ăn tránh dư thừa. Bổ sung Vitamin C."
-                },
-                {
-                    check: (data) => data.temp > 32,
-                    diagnosis: "Nhiệt độ tăng cao (> 32°C). Oxy hòa tan giảm mạnh. Khu khuẩn Vibrio dễ bùng phát.",
-                    actionText: "Khuyến nghị: Bật toàn bộ sục khí và quạt nước. Xem xét nâng mức nước ao lên 1.2m - 1.5m."
-                },
-                {
-                    check: (data) => data.orp >= 150 && data.orp <= 200,
-                    diagnosis: "ORP suy giảm (150-200mV). Đáy ao bắt đầu tích tụ chất thải hữu cơ.",
-                    actionText: "Khuyến nghị: Xi-phông hút đáy nhẹ nhàng. Cắt cử ăn 1 bữa. Bổ sung vi sinh xử lý đáy."
-                },
-                {
-                    check: (data) => data.orp < 150,
-                    diagnosis: "ORP cực thấp (< 150mV). Môi trường yếm khí nặng, sinh khí H2S kịch độc.",
-                    actionText: "Khuyến nghị: Xi-phông xả đáy khẩn cấp. Rải thuốc tím (KMnO4) hoặc Yucca."
-                },
-                {
-                    check: (data) => data.ec < 10,
-                    diagnosis: "Độ mặn (EC) thấp (< 10 ppt). Tôm dễ sốc thẩm thấu, đục cơ, mềm vỏ.",
-                    actionText: "Khuyến nghị: Tạt vôi Canxi và khoáng tạt xuống ao để giúp tôm cứng vỏ."
-                }
+                { check: (data) => data.ph < 7.5, diagnosis: "Độ pH giảm mạnh (< 7.5). Môi trường axit hóa, tôm khó lột xác, khí độc H2S dễ bùng phát.", actionText: "Khuyến nghị: Đánh vôi (CaCO3/Dolomite) 15-20kg/1000m3. Bật 100% quạt nước để xua khí độc." },
+                { check: (data) => data.ph > 8.5, diagnosis: "Độ pH tăng cao (> 8.5). Độc tính của khí NH3 tăng, gây ngạt và stress cho tôm.", actionText: "Khuyến nghị: Xả bớt nước tầng mặt, thay 20% nước mới. Giảm lượng thức ăn." },
+                { check: (data) => data.temp < 25, diagnosis: "Nhiệt độ giảm đột ngột (< 25°C). Tôm giảm ăn, trao đổi chất chậm. Nguy cơ Đốm trắng.", actionText: "Khuyến nghị: Giảm 30-50% lượng thức ăn tránh dư thừa. Bổ sung Vitamin C." },
+                { check: (data) => data.temp > 32, diagnosis: "Nhiệt độ tăng cao (> 32°C). Oxy hòa tan giảm mạnh. Khu khuẩn Vibrio dễ bùng phát.", actionText: "Khuyến nghị: Bật toàn bộ sục khí và quạt nước. Xem xét nâng mức nước ao lên 1.2m - 1.5m." },
+                { check: (data) => data.orp >= 150 && data.orp <= 200, diagnosis: "ORP suy giảm (150-200mV). Đáy ao bắt đầu tích tụ chất thải hữu cơ.", actionText: "Khuyến nghị: Xi-phông hút đáy nhẹ nhàng. Cắt cử ăn 1 bữa. Bổ sung vi sinh xử lý đáy." },
+                { check: (data) => data.orp < 150, diagnosis: "ORP cực thấp (< 150mV). Môi trường yếm khí nặng, sinh khí H2S kịch độc.", actionText: "Khuyến nghị: Xi-phông xả đáy khẩn cấp. Rải thuốc tím (KMnO4) hoặc Yucca." },
+                { check: (data) => data.ec < 10, diagnosis: "Độ mặn (EC) thấp (< 10 ppt). Tôm dễ sốc thẩm thấu, đục cơ, mềm vỏ.", actionText: "Khuyến nghị: Tạt vôi Canxi và khoáng tạt xuống ao để giúp tôm cứng vỏ." }
             ]
         };
 
@@ -384,11 +377,7 @@
             const dataFrame = { ph: currentPh, temp: currentTemp, orp: currentOrp, ec: currentEc };
             let aiFindings = [];
 
-            // Nếu dữ liệu chưa tải về thành công (NaN), chuyển sang trạng thái chờ để tránh lỗi hiển thị
-            if (isNaN(currentPh) || isNaN(currentTemp)) {
-                renderAIPending();
-                return;
-            }
+            if (isNaN(currentPh) || isNaN(currentTemp)) { renderAIPending(); return; }
             
             WioTAquacultureBrain.rules.forEach(rule => {
                 if (rule.check(dataFrame)) {
@@ -402,55 +391,26 @@
                     `);
                 }
             });
-
             renderAIPanel(aiFindings, dataFrame);
         }
 
         function renderAIPending() {
             const gridContainer = document.getElementById('monitor-cards-grid');
-            const aiHtml = `
-                <div class="mt-4 rounded-2xl p-4 border shadow-sm bg-slate-50 border-slate-200 animate-fade-in">
-                    <div class="flex items-center mb-2">
-                        <div class="p-1.5 bg-slate-200 rounded-lg mr-2"><i class="fa-solid fa-hourglass-half text-slate-500"></i></div>
-                        <h4 class="font-black text-slate-700 uppercase tracking-wide text-xs">TRỢ LÝ AI ĐANG CHỜ DỮ LIỆU</h4>
-                    </div>
-                    <p class="text-[11px] text-slate-500 font-medium leading-relaxed">Hệ thống đang chờ dữ liệu cảm biến mới nhất từ ao nuôi để tiến hành phân tích môi trường.</p>
-                </div>
-            `;
+            const aiHtml = `<div class="mt-4 rounded-2xl p-4 border shadow-sm bg-slate-50 border-slate-200 animate-fade-in"><div class="flex items-center mb-2"><div class="p-1.5 bg-slate-200 rounded-lg mr-2"><i class="fa-solid fa-hourglass-half text-slate-500"></i></div><h4 class="font-black text-slate-700 uppercase tracking-wide text-xs">TRỢ LÝ AI ĐANG CHỜ DỮ LIỆU</h4></div><p class="text-[11px] text-slate-500 font-medium leading-relaxed">Hệ thống đang chờ dữ liệu cảm biến mới nhất từ ao nuôi để tiến hành phân tích môi trường.</p></div>`;
             let existingAiPanel = document.getElementById('ai-local-panel');
-            if (existingAiPanel) existingAiPanel.outerHTML = `<div id="ai-local-panel">${aiHtml}</div>`;
-            else gridContainer.insertAdjacentHTML('afterend', `<div id="ai-local-panel">${aiHtml}</div>`);
+            if (existingAiPanel) existingAiPanel.outerHTML = `<div id="ai-local-panel">${aiHtml}</div>`; else gridContainer.insertAdjacentHTML('afterend', `<div id="ai-local-panel">${aiHtml}</div>`);
         }
 
         function renderAIPanel(findings, dataFrame) {
             const gridContainer = document.getElementById('monitor-cards-grid');
             let aiHtml = "";
-
             if (findings.length === 0) {
-                aiHtml = `
-                    <div class="mt-4 rounded-2xl p-4 border shadow-sm bg-emerald-50 border-emerald-200 animate-fade-in">
-                        <div class="flex items-center mb-2">
-                            <div class="p-1.5 bg-emerald-100 rounded-lg mr-2"><i class="fa-solid fa-check-double text-emerald-600"></i></div>
-                            <h4 class="font-black text-slate-800 uppercase tracking-wide text-xs">TRỢ LÝ AI: MÔI TRƯỜNG ỔN ĐỊNH</h4>
-                        </div>
-                        <p class="text-[11px] text-slate-600 font-medium leading-relaxed">Tuyệt vời! Các chỉ số (pH: ${dataFrame.ph}, Temp: ${dataFrame.temp}°C) đều nằm trong ngưỡng an toàn sinh học. Khuyến nghị duy trì lượng thức ăn và sục khí hiện tại.</p>
-                    </div>
-                `;
+                aiHtml = `<div class="mt-4 rounded-2xl p-4 border shadow-sm bg-emerald-50 border-emerald-200 animate-fade-in"><div class="flex items-center mb-2"><div class="p-1.5 bg-emerald-100 rounded-lg mr-2"><i class="fa-solid fa-check-double text-emerald-600"></i></div><h4 class="font-black text-slate-800 uppercase tracking-wide text-xs">TRỢ LÝ AI: MÔI TRƯỜNG ỔN ĐỊNH</h4></div><p class="text-[11px] text-slate-600 font-medium leading-relaxed">Tuyệt vời! Các chỉ số (pH: ${dataFrame.ph}, Temp: ${dataFrame.temp}°C) đều nằm trong ngưỡng an toàn sinh học. Khuyến nghị duy trì lượng thức ăn và sục khí hiện tại.</p></div>`;
             } else {
-                aiHtml = `
-                    <div class="mt-4 rounded-2xl p-4 border shadow-sm bg-rose-50 border-rose-200 animate-fade-in">
-                        <div class="flex items-center mb-3">
-                            <div class="p-1.5 bg-rose-200 rounded-lg mr-2"><i class="fa-solid fa-robot text-rose-700 animate-bounce"></i></div>
-                            <h4 class="font-black text-rose-800 uppercase tracking-wide text-xs">AI KHUYẾN NGHỊ HÀNH ĐỘNG</h4>
-                        </div>
-                        <div class="space-y-1">${findings.join('')}</div>
-                    </div>
-                `;
+                aiHtml = `<div class="mt-4 rounded-2xl p-4 border shadow-sm bg-rose-50 border-rose-200 animate-fade-in"><div class="flex items-center mb-3"><div class="p-1.5 bg-rose-200 rounded-lg mr-2"><i class="fa-solid fa-robot text-rose-700 animate-bounce"></i></div><h4 class="font-black text-rose-800 uppercase tracking-wide text-xs">AI KHUYẾN NGHỊ HÀNH ĐỘNG</h4></div><div class="space-y-1">${findings.join('')}</div></div>`;
             }
-
             let existingAiPanel = document.getElementById('ai-local-panel');
-            if (existingAiPanel) existingAiPanel.outerHTML = `<div id="ai-local-panel">${aiHtml}</div>`;
-            else gridContainer.insertAdjacentHTML('afterend', `<div id="ai-local-panel">${aiHtml}</div>`);
+            if (existingAiPanel) existingAiPanel.outerHTML = `<div id="ai-local-panel">${aiHtml}</div>`; else gridContainer.insertAdjacentHTML('afterend', `<div id="ai-local-panel">${aiHtml}</div>`);
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -463,19 +423,16 @@
                 isGuestMode = true;
                 const navControl = document.getElementById('nav-control');
                 if (navControl) navControl.style.display = 'none';
-                document.getElementById('nav-dashboard').classList.replace('flex-1', 'w-1/2');
-                document.getElementById('nav-passport').classList.replace('flex-1', 'w-1/2');
             }
 
             if (pondParam) changeActivePond(pondParam); else changeActivePond("1");
-            if (tabParam === 'passport') switchTab('passport');
+            if (tabParam) switchTab(tabParam);
             
             fetchTelemetryData();
             setInterval(fetchTelemetryData, 5000);
             setTimeout(loadHealthChart, 1000);
         });
 
-        // --- HÀM XÁC THỰC VÀ MỞ KHÓA BẢO MẬT ---
         function verifyOwnerPin() {
             const inputVal = document.getElementById('pin-input').value;
             const errorMsg = document.getElementById('pin-error-msg');
@@ -494,55 +451,29 @@
             }
         }
 
-        // --- HÀM XỬ LÝ MODAL ĐỔI PIN ---
         function openChangePinModal() {
             document.getElementById('modal-change-pin').classList.remove('hidden');
             document.getElementById('cp-old').value = ""; document.getElementById('cp-new').value = ""; document.getElementById('cp-confirm').value = "";
             document.getElementById('cp-error').classList.add('hidden'); document.getElementById('cp-success').classList.add('hidden');
         }
 
-        function closeChangePinModal() {
-            document.getElementById('modal-change-pin').classList.add('hidden');
-        }
+        function closeChangePinModal() { document.getElementById('modal-change-pin').classList.add('hidden'); }
 
         async function submitChangePin() {
-            const oldPin = document.getElementById('cp-old').value;
-            const newPin = document.getElementById('cp-new').value;
-            const confirmPin = document.getElementById('cp-confirm').value;
-            const errorEl = document.getElementById('cp-error');
-            const successEl = document.getElementById('cp-success');
-            const btn = document.getElementById('btn-submit-pin');
-
+            const oldPin = document.getElementById('cp-old').value, newPin = document.getElementById('cp-new').value, confirmPin = document.getElementById('cp-confirm').value, errorEl = document.getElementById('cp-error'), successEl = document.getElementById('cp-success'), btn = document.getElementById('btn-submit-pin');
             errorEl.classList.add('hidden'); successEl.classList.add('hidden');
 
-            if (oldPin.length !== 4 || newPin.length !== 4 || confirmPin.length !== 4) {
-                errorEl.innerText = "Vui lòng nhập đủ 4 số cho các trường!"; errorEl.classList.remove('hidden'); return;
-            }
-            if (newPin !== confirmPin) {
-                errorEl.innerText = "Mã PIN mới và Xác nhận không khớp!"; errorEl.classList.remove('hidden'); return;
-            }
+            if (oldPin.length !== 4 || newPin.length !== 4 || confirmPin.length !== 4) { errorEl.innerText = "Vui lòng nhập đủ 4 số cho các trường!"; errorEl.classList.remove('hidden'); return; }
+            if (newPin !== confirmPin) { errorEl.innerText = "Mã PIN mới và Xác nhận không khớp!"; errorEl.classList.remove('hidden'); return; }
 
-            const originalBtnText = btn.innerHTML;
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG XỬ LÝ...';
-            btn.disabled = true;
+            const originalBtnText = btn.innerHTML; btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG XỬ LÝ...'; btn.disabled = true;
 
             try {
                 const url = `${PROXY_URL}?action=change_pin&device_id=${DEVICE_ID}&old_pin=${oldPin}&new_pin=${newPin}`;
-                const response = await fetch(url);
-                const data = await response.json();
-
-                if (data.status === "SUCCESS") {
-                    OWNER_PIN = newPin;
-                    successEl.classList.remove('hidden');
-                    setTimeout(() => { closeChangePinModal(); }, 1500);
-                } else {
-                    errorEl.innerText = data.message || "Lỗi khi đổi mã PIN!"; errorEl.classList.remove('hidden');
-                }
-            } catch (err) {
-                errorEl.innerText = "Lỗi kết nối mạng!"; errorEl.classList.remove('hidden');
-            } finally {
-                btn.innerHTML = originalBtnText; btn.disabled = false;
-            }
+                const response = await fetch(url); const data = await response.json();
+                if (data.status === "SUCCESS") { OWNER_PIN = newPin; successEl.classList.remove('hidden'); setTimeout(() => { closeChangePinModal(); }, 1500); } 
+                else { errorEl.innerText = data.message || "Lỗi khi đổi mã PIN!"; errorEl.classList.remove('hidden'); }
+            } catch (err) { errorEl.innerText = "Lỗi kết nối mạng!"; errorEl.classList.remove('hidden'); } finally { btn.innerHTML = originalBtnText; btn.disabled = false; }
         }
 
         function switchTab(tabName) {
@@ -554,20 +485,16 @@
         }
 
         function changeActivePond(pondVal) {
-            activePond = pondVal;
-            const pondInfo = POND_RELAY_MAP[activePond];
+            activePond = pondVal; const pondInfo = POND_RELAY_MAP[activePond];
             document.getElementById('dash-pond-title').innerText = pondInfo.name;
             document.getElementById('monitor-cards-grid').innerHTML = '<div class="col-span-2 text-center text-gray-400 py-10"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Đang tải dữ liệu...</div>';
-            
             const aiPanel = document.getElementById('ai-local-panel'); if (aiPanel) aiPanel.remove();
 
             document.getElementById('ctrl-section-title').children[0].innerText = `THIẾT BỊ DÀNH RIÊNG CHO ${pondInfo.name}`;
             document.getElementById('label-relay-van').innerText = `Van Điện ${pondInfo.name} (${pondInfo.van})`;
             document.getElementById('label-relay-quat').innerText = `Dàn Quạt Nước ${pondInfo.name} (${pondInfo.quat})`;
             document.getElementById('label-relay-xaday').innerText = `Bơm Xả Đáy ${pondInfo.name} (${pondInfo.xaday})`;
-            
             document.getElementById('chk-relay-van').checked = false; document.getElementById('chk-relay-quat').checked = false; document.getElementById('chk-relay-xaday').checked = false;
-
             generateQRCode(); updatePassportUI(); fetchTelemetryData(); loadHealthChart();
         }
 
@@ -578,105 +505,51 @@
         }
 
         async function loadHealthChart() {
-            const btn = document.getElementById('btn-load-chart');
-            btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẢI';
+            const btn = document.getElementById('btn-load-chart'); btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẢI';
             try {
                 const url = `${PROXY_URL}?action=get_chart_data&device_id=${DEVICE_ID}&pond=${activePond}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
+                const response = await fetch(url); const data = await response.json();
                 if(data.status === "SUCCESS" && data.chart_data) {
                     const ctx = document.getElementById('healthChart').getContext('2d');
                     if(healthChartInstance) healthChartInstance.destroy();
                     healthChartInstance = new Chart(ctx, {
-                        type: 'line',
-                        data: {
-                            labels: data.chart_data.labels,
-                            datasets: [
-                                { label: 'pH', data: data.chart_data.ph, borderColor: '#1ea6d9', backgroundColor: 'rgba(30, 166, 217, 0.1)', yAxisID: 'y', tension: 0.4, borderWidth: 2, pointRadius: 3 },
-                                { label: 'Nhiệt độ (°C)', data: data.chart_data.temp, borderColor: '#ef4444', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.4, borderWidth: 2, borderDash: [5, 5], pointRadius: 3 }
-                            ]
-                        },
-                        options: {
-                            responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false },
-                            plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } },
-                            scales: {
-                                y: { type: 'linear', display: true, position: 'left', suggestedMin: 7.0, suggestedMax: 9.0, title: { display: true, text: 'pH', font: { size: 10, weight: 'bold' }, color: '#1ea6d9' }, ticks: { color: '#1ea6d9' } },
-                                y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, suggestedMin: 24.0, suggestedMax: 34.0, title: { display: true, text: 'Nhiệt độ (°C)', font: { size: 10, weight: 'bold' }, color: '#ef4444' }, ticks: { color: '#ef4444' } }
-                            }
-                        }
+                        type: 'line', data: { labels: data.chart_data.labels, datasets: [{ label: 'pH', data: data.chart_data.ph, borderColor: '#1ea6d9', backgroundColor: 'rgba(30, 166, 217, 0.1)', yAxisID: 'y', tension: 0.4, borderWidth: 2, pointRadius: 3 }, { label: 'Nhiệt độ (°C)', data: data.chart_data.temp, borderColor: '#ef4444', backgroundColor: 'transparent', yAxisID: 'y1', tension: 0.4, borderWidth: 2, borderDash: [5, 5], pointRadius: 3 }] },
+                        options: { responsive: true, maintainAspectRatio: false, interaction: { mode: 'index', intersect: false }, plugins: { legend: { display: true, position: 'bottom', labels: { boxWidth: 12, font: { size: 10 } } } }, scales: { y: { type: 'linear', display: true, position: 'left', suggestedMin: 7.0, suggestedMax: 9.0, title: { display: true, text: 'pH', font: { size: 10, weight: 'bold' }, color: '#1ea6d9' }, ticks: { color: '#1ea6d9' } }, y1: { type: 'linear', display: true, position: 'right', grid: { drawOnChartArea: false }, suggestedMin: 24.0, suggestedMax: 34.0, title: { display: true, text: 'Nhiệt độ (°C)', font: { size: 10, weight: 'bold' }, color: '#ef4444' }, ticks: { color: '#ef4444' } } } }
                     });
                 }
-            } catch (err) { console.error("Lỗi vẽ biểu đồ:", err); } finally { btn.innerHTML = '<i class="fa-solid fa-rotate"></i> TẢI LẠI'; }
+            } catch (err) {} finally { btn.innerHTML = '<i class="fa-solid fa-rotate"></i> TẢI LẠI'; }
         }
 
         async function fetchTelemetryData() {
             try {
                 const url = `${PROXY_URL}?action=get_dashboard&device_id=${DEVICE_ID}`;
-                const response = await fetch(url);
-                const data = await response.json();
-                
+                const response = await fetch(url); const data = await response.json();
                 if (data.status === "ERROR") {
-                    document.getElementById('monitor-cards-grid').innerHTML = `
-                        <div class="col-span-2 text-center text-rose-600 py-8 bg-rose-50 rounded-2xl border border-rose-200">
-                            <i class="fa-solid fa-triangle-exclamation text-3xl mb-3"></i><br>
-                            <span class="font-bold text-sm leading-snug block px-4">${data.message}</span>
-                        </div>
-                    `;
-                    const chartBtn = document.getElementById('btn-load-chart');
-                    if(chartBtn) chartBtn.innerHTML = '<i class="fa-solid fa-rotate"></i> LỖI DỮ LIỆU';
-                    return;
+                    document.getElementById('monitor-cards-grid').innerHTML = `<div class="col-span-2 text-center text-rose-600 py-8 bg-rose-50 rounded-2xl border border-rose-200"><i class="fa-solid fa-triangle-exclamation text-3xl mb-3"></i><br><span class="font-bold text-sm leading-snug block px-4">${data.message}</span></div>`;
+                    const chartBtn = document.getElementById('btn-load-chart'); if(chartBtn) chartBtn.innerHTML = '<i class="fa-solid fa-rotate"></i> LỖI DỮ LIỆU'; return;
                 }
-                
                 if (data.owner_pin) OWNER_PIN = data.owner_pin;
-
-                const pondKey = `pond${activePond}`;
-                const pondData = data[pondKey];
+                const pondKey = `pond${activePond}`; const pondData = data[pondKey];
 
                 if (pondData) {
-                    document.getElementById('last-updated').innerText = pondData.ts || "--:--:--";
-                    document.getElementById('last-updated-date').innerText = pondData.date || "--/--/----";
-
+                    document.getElementById('last-updated').innerText = pondData.ts || "--:--:--"; document.getElementById('last-updated-date').innerText = pondData.date || "--/--/----";
                     const ph = parseFloat(pondData.ph); const temp = parseFloat(pondData.temp); const ec = parseFloat(pondData.ec); const orp = parseFloat(pondData.orp);
-
-                    const buildCard = (title, icon, value, unit, idealText, isBad, impactText) => `
-                        <div class="bg-white rounded-2xl p-4 shadow-sm border ${isBad ? 'border-rose-200' : 'border-slate-100'} relative overflow-hidden">
-                            <div class="absolute left-0 top-0 bottom-0 w-1 ${isBad ? 'bg-rose-500' : 'bg-emerald-400'}"></div>
-                            <div class="flex justify-between items-center text-slate-400 text-xs mb-1 font-medium"><span>${title}</span><i class="${icon} ${isBad ? 'text-rose-500' : 'text-emerald-500'}"></i></div>
-                            <div class="flex items-baseline space-x-1 mb-2"><span class="text-3xl font-black text-slate-800">${value}</span><span class="text-xs text-slate-500 font-bold">${unit}</span></div>
-                            <span class="text-[10px] font-semibold px-1.5 py-0.5 rounded inline-block ${isBad ? 'bg-rose-50 text-rose-600' : 'bg-slate-50 text-emerald-600'}">${idealText}</span>
-                            ${isBad ? `<p class="text-[11px] text-rose-500 mt-2 font-medium leading-tight animate-pulse"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${impactText}</p>` : ''}
-                        </div>
-                    `;
-
-                    const isPhBad = isNaN(ph) ? false : (ph < 7.5 || ph > 8.5);
-                    const phCard = buildCard("Độ pH nước", "fa-solid fa-vial", pondData.ph, "", "Ngưỡng (7.5 - 8.5)", isPhBad, ph < 7.5 ? "Chậm lột vỏ, nhiễm độc H2S" : "Khí độc NH3 tăng, tôm stress");
-                    const isOrpBad = isNaN(orp) ? false : (orp < 200);
-                    const orpCard = buildCard("Chỉ số ORP", "fa-solid fa-bolt", pondData.orp, "mV", "Môi trường sạch (>200)", isOrpBad, "Đáy ao yếm khí, thiếu oxy");
-                    const isEcBad = isNaN(ec) ? false : (ec < 10 || ec > 30);
-                    const ecCard = buildCard("Độ mặn EC", "fa-solid fa-droplet", pondData.ec, "ppt", "Ổn định (10 - 30)", isEcBad, ec < 10 ? "Tôm mất khoáng, mềm vỏ" : "Hao hụt năng lượng thẩm thấu");
-                    const isTempBad = isNaN(temp) ? false : (temp < 26 || temp > 32);
-                    const tempCard = buildCard("Nhiệt độ nước", "fa-solid fa-temperature-half", pondData.temp, "°C", "Mức chuẩn (26 - 32)", isTempBad, temp < 26 ? "Tôm bỏ ăn, tiêu hóa kém" : "Sốc nhiệt, dễ dịch bệnh");
-
+                    const buildCard = (title, icon, value, unit, idealText, isBad, impactText) => `<div class="bg-white rounded-2xl p-4 shadow-sm border ${isBad ? 'border-rose-200' : 'border-slate-100'} relative overflow-hidden"><div class="absolute left-0 top-0 bottom-0 w-1 ${isBad ? 'bg-rose-500' : 'bg-emerald-400'}"></div><div class="flex justify-between items-center text-slate-400 text-xs mb-1 font-medium"><span>${title}</span><i class="${icon} ${isBad ? 'text-rose-500' : 'text-emerald-500'}"></i></div><div class="flex items-baseline space-x-1 mb-2"><span class="text-3xl font-black text-slate-800">${value}</span><span class="text-xs text-slate-500 font-bold">${unit}</span></div><span class="text-[10px] font-semibold px-1.5 py-0.5 rounded inline-block ${isBad ? 'bg-rose-50 text-rose-600' : 'bg-slate-50 text-emerald-600'}">${idealText}</span>${isBad ? `<p class="text-[11px] text-rose-500 mt-2 font-medium leading-tight animate-pulse"><i class="fa-solid fa-triangle-exclamation mr-1"></i>${impactText}</p>` : ''}</div>`;
+                    const isPhBad = isNaN(ph) ? false : (ph < 7.5 || ph > 8.5); const phCard = buildCard("Độ pH nước", "fa-solid fa-vial", pondData.ph, "", "Ngưỡng (7.5 - 8.5)", isPhBad, ph < 7.5 ? "Chậm lột vỏ, nhiễm độc H2S" : "Khí độc NH3 tăng, tôm stress");
+                    const isOrpBad = isNaN(orp) ? false : (orp < 200); const orpCard = buildCard("Chỉ số ORP", "fa-solid fa-bolt", pondData.orp, "mV", "Môi trường sạch (>200)", isOrpBad, "Đáy ao yếm khí, thiếu oxy");
+                    const isEcBad = isNaN(ec) ? false : (ec < 10 || ec > 30); const ecCard = buildCard("Độ mặn EC", "fa-solid fa-droplet", pondData.ec, "ppt", "Ổn định (10 - 30)", isEcBad, ec < 10 ? "Tôm mất khoáng, mềm vỏ" : "Hao hụt năng lượng thẩm thấu");
+                    const isTempBad = isNaN(temp) ? false : (temp < 26 || temp > 32); const tempCard = buildCard("Nhiệt độ nước", "fa-solid fa-temperature-half", pondData.temp, "°C", "Mức chuẩn (26 - 32)", isTempBad, temp < 26 ? "Tôm bỏ ăn, tiêu hóa kém" : "Sốc nhiệt, dễ dịch bệnh");
                     document.getElementById('monitor-cards-grid').innerHTML = phCard + orpCard + ecCard + tempCard;
-
                     runLocalAIAssistant(ph, temp, orp, ec);
                 }
-            } catch (error) { 
-                console.error("Lỗi fetchTelemetryData:", error); 
-                document.getElementById('monitor-cards-grid').innerHTML = `<div class="col-span-2 text-center text-rose-500 py-10 font-bold"><i class="fa-solid fa-wifi text-2xl mb-2"></i><br>Lỗi kết nối máy chủ!</div>`;
-            }
+            } catch (error) { document.getElementById('monitor-cards-grid').innerHTML = `<div class="col-span-2 text-center text-rose-500 py-10 font-bold"><i class="fa-solid fa-wifi text-2xl mb-2"></i><br>Lỗi kết nối máy chủ!</div>`; }
         }
 
         function toggleManualMode1Way() {
             isManualMode = !isManualMode;
             const btn = document.getElementById('btn-manual-toggle'), iconBox = document.getElementById('manual-icon-box'), icon = document.getElementById('manual-icon'), title = document.getElementById('manual-status-title'), desc = document.getElementById('manual-status-desc'), badge = document.getElementById('manual-badge'), panelContainer = document.getElementById('control-panel-container');
-
-            if (isManualMode) {
-                btn.className = "cursor-pointer bg-amber-50/90 p-4 rounded-2xl shadow-sm border-2 border-amber-400/80 transition-all duration-200 flex items-center justify-between"; iconBox.className = "p-3 bg-amber-100 text-amber-600 rounded-xl transition-all"; icon.className = "fa-solid fa-hand-pointer text-xl animate-bounce"; title.innerText = "CHẾ ĐỘ THỦ CÔNG"; title.className = "font-black text-sm text-amber-900"; desc.innerText = "Đã mở khóa điều khiển"; desc.className = "text-[11px] text-amber-700 font-medium"; badge.innerText = "MANUAL"; badge.className = "px-2.5 py-1 bg-amber-500 text-white text-[10px] font-black rounded-lg shadow-sm uppercase tracking-wider"; panelContainer.className = "opacity-100 pointer-events-auto transition-all duration-300 space-y-4"; send1WayCommand('LB100', 0);
-            } else {
-                btn.className = "cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 transition-all duration-200 flex items-center justify-between"; iconBox.className = "p-3 bg-slate-100 text-slate-500 rounded-xl transition-all"; icon.className = "fa-solid fa-robot text-xl"; title.innerText = "CHẾ ĐỘ TỰ ĐỘNG"; title.className = "font-bold text-sm text-slate-800"; desc.innerText = "Chạm để bật điều khiển thủ công"; desc.className = "text-[11px] text-slate-400"; badge.innerText = "AUTO"; badge.className = "px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-lg border border-slate-200 uppercase tracking-wider"; panelContainer.className = "opacity-50 pointer-events-none transition-all duration-300 space-y-4"; send1WayCommand('LB100', 1);
-            }
+            if (isManualMode) { btn.className = "cursor-pointer bg-amber-50/90 p-4 rounded-2xl shadow-sm border-2 border-amber-400/80 transition-all duration-200 flex items-center justify-between"; iconBox.className = "p-3 bg-amber-100 text-amber-600 rounded-xl transition-all"; icon.className = "fa-solid fa-hand-pointer text-xl animate-bounce"; title.innerText = "CHẾ ĐỘ THỦ CÔNG"; title.className = "font-black text-sm text-amber-900"; desc.innerText = "Đã mở khóa điều khiển"; desc.className = "text-[11px] text-amber-700 font-medium"; badge.innerText = "MANUAL"; badge.className = "px-2.5 py-1 bg-amber-500 text-white text-[10px] font-black rounded-lg shadow-sm uppercase tracking-wider"; panelContainer.className = "opacity-100 pointer-events-auto transition-all duration-300 space-y-4"; send1WayCommand('LB100', 0); } 
+            else { btn.className = "cursor-pointer bg-white p-4 rounded-2xl shadow-sm border border-slate-200 transition-all duration-200 flex items-center justify-between"; iconBox.className = "p-3 bg-slate-100 text-slate-500 rounded-xl transition-all"; icon.className = "fa-solid fa-robot text-xl"; title.innerText = "CHẾ ĐỘ TỰ ĐỘNG"; title.className = "font-bold text-sm text-slate-800"; desc.innerText = "Chạm để bật điều khiển thủ công"; desc.className = "text-[11px] text-slate-400"; badge.innerText = "AUTO"; badge.className = "px-2.5 py-1 bg-slate-100 text-slate-600 text-[10px] font-bold rounded-lg border border-slate-200 uppercase tracking-wider"; panelContainer.className = "opacity-50 pointer-events-none transition-all duration-300 space-y-4"; send1WayCommand('LB100', 1); }
         }
 
         function toggleCommonRelay1Way(relayId) {
@@ -687,35 +560,28 @@
         }
 
         function triggerRelay1Way(type, isChecked) { send1WayCommand(POND_RELAY_MAP[activePond][type], isChecked ? 1 : 0); }
-        function send1WayCommand(relayId, state) { if (isGuestMode || !isControlUnlocked) return; const url = `${PROXY_URL}?action=set_command&device_id=${DEVICE_ID}&relay_id=${relayId}&target_state=${state}`; fetch(url).catch(err => console.log("Lệnh phát đi:", relayId, state)); }
+        function send1WayCommand(relayId, state) { if (isGuestMode || !isControlUnlocked) return; const url = `${PROXY_URL}?action=set_command&device_id=${DEVICE_ID}&relay_id=${relayId}&target_state=${state}`; fetch(url).catch(err => {}); }
 
         async function updatePassportUI() {
             const pondNameEl = document.getElementById('ui-passport-pond'); if(pondNameEl) pondNameEl.innerText = `AO NUÔI ${activePond}`;
             const wqiEl = document.getElementById('ui-passport-wqi'), gradeEl = document.getElementById('ui-passport-grade'), badgeEl = document.getElementById('ui-passport-badge'), descEl = document.getElementById('ui-passport-desc'), diagEl = document.getElementById('ui-passport-diagnostics');
             if (wqiEl) wqiEl.innerText = "--"; if (gradeEl) gradeEl.innerText = ""; if (diagEl) diagEl.classList.add('hidden');
             if (badgeEl) { badgeEl.innerText = "ĐANG TẢI..."; badgeEl.className = "bg-slate-300 text-white font-bold py-2 px-4 rounded-lg text-xs text-center w-28 shadow-sm"; }
-
             try {
                 const url = `${PROXY_URL}?action=get_passport&device_id=${DEVICE_ID}&pond=${activePond}`;
-                const response = await fetch(url);
-                const data = await response.json();
-
+                const response = await fetch(url); const data = await response.json();
                 if (data.status === "SUCCESS") {
                     const wqi = data.wqi_score; const latest = data.latest;
                     if (wqiEl) wqiEl.innerText = wqi;
                     if (descEl) descEl.innerHTML = `Quét mã QR để truy xuất ${data.history ? data.history.length : 0} bản ghi gần nhất của ao nuôi.<br>Tiêu chuẩn áp dụng: ASC / BAP.`;
-
                     let grade = "", badgeText = "", badgeClass = "text-white font-bold py-2 px-4 rounded-lg text-xs text-center w-28 shadow-sm ";
                     if (wqi >= 90) { grade = "(Hạng A+)"; badgeText = "XUẤT SẮC"; badgeClass += "bg-emerald-500"; wqiEl.className = "text-4xl font-black text-emerald-500"; } 
                     else if (wqi >= 75) { grade = "(Hạng A)"; badgeText = "ĐẠT CHUẨN"; badgeClass += "bg-emerald-400"; wqiEl.className = "text-4xl font-black text-emerald-400"; } 
                     else if (wqi >= 50) { grade = "(Hạng B)"; badgeText = "CẦN LƯU Ý"; badgeClass += "bg-amber-500"; wqiEl.className = "text-4xl font-black text-amber-500"; } 
                     else { grade = "(Hạng C)"; badgeText = "NGUY HIỂM"; badgeClass += "bg-rose-500"; wqiEl.className = "text-4xl font-black text-rose-500"; }
-
                     if (gradeEl) gradeEl.innerText = grade; if (badgeEl) { badgeEl.innerText = badgeText; badgeEl.className = badgeClass; }
-
                     if (diagEl && latest) {
-                        let diagHTML = "";
-                        const ph = parseFloat(latest.ph) || 0, temp = parseFloat(latest.temp) || 0, orp = parseFloat(latest.orp) || 0, ec = parseFloat(latest.ec) || 0;
+                        let diagHTML = ""; const ph = parseFloat(latest.ph) || 0, temp = parseFloat(latest.temp) || 0, orp = parseFloat(latest.orp) || 0, ec = parseFloat(latest.ec) || 0;
                         if (ph < 7.0 || ph > 9.0) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>pH Nguy hiểm (${ph})</span>`; else if (ph < 7.5 || ph > 8.5) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-circle-exclamation mr-1"></i>pH Khá xấu (${ph})</span>`;
                         if (temp < 24 || temp > 34) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-temperature-arrow-up mr-1"></i>Nhiệt độ Sốc (${temp}°C)</span>`; else if (temp < 26 || temp > 32) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-temperature-half mr-1"></i>Nhiệt độ Bất lợi (${temp}°C)</span>`;
                         if (orp < 150) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-skull-crossbones mr-1"></i>Đáy ao độc hại (${orp}mV)</span>`; else if (orp < 200) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-water mr-1"></i>Đáy ao bẩn (${orp}mV)</span>`;
@@ -724,7 +590,7 @@
                         diagEl.innerHTML = diagHTML; diagEl.classList.remove('hidden');
                     }
                 }
-            } catch (error) { console.error("Lỗi updatePassportUI:", error); }
+            } catch (error) {}
         }
 
         async function downloadCertificatePDF(btnElement) {
@@ -739,10 +605,7 @@
                 for (let i = 0; i < data.history.length; i += ROWS_PER_PAGE) chunks.push(data.history.slice(i, i + ROWS_PER_PAGE));
 
                 const appendixPagesHTML = chunks.map((chunk, chunkIndex) => {
-                    const rowsHTML = chunk.map((row, index) => `
-                        <tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f8fafc'}; border-bottom: 1px solid #e2e8f0; page-break-inside: avoid;">
-                            <td style="padding: 12px; text-align: center; font-size: 13px; color: #475569;">${row.timestamp}</td><td style="padding: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #1ea6d9;">${row.ph}</td><td style="padding: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #d97706;">${row.ec}</td><td style="padding: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #8b5cf6;">${row.orp}</td><td style="padding: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #ef4444;">${row.temp}</td>
-                        </tr>`).join('');
+                    const rowsHTML = chunk.map((row, index) => `<tr style="background: ${index % 2 === 0 ? '#ffffff' : '#f8fafc'}; border-bottom: 1px solid #e2e8f0; page-break-inside: avoid;"><td style="padding: 12px; text-align: center; font-size: 13px; color: #475569;">${row.timestamp}</td><td style="padding: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #1ea6d9;">${row.ph}</td><td style="padding: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #d97706;">${row.ec}</td><td style="padding: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #8b5cf6;">${row.orp}</td><td style="padding: 12px; text-align: center; font-size: 13px; font-weight: bold; color: #ef4444;">${row.temp}</td></tr>`).join('');
                     const pageHeaderHTML = chunkIndex === 0 ? `<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #003882; padding-bottom: 15px; margin-bottom: 25px;"><div><h2 style="font-size: 22px; font-weight: 900; color: #003882; text-transform: uppercase; margin: 0;">PHỤ LỤC: NHẬT KÝ QUAN TRẮC MÔI TRƯỜNG</h2><p style="font-size: 13px; color: #64748b; margin: 6px 0 0 0;">Trích xuất ${data.history.length} bản ghi gần nhất. (Trang ${chunkIndex + 1}/${chunks.length})</p></div><img src="./logo.png" style="width: 140px; height: auto;"></div>` : `<div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #003882; padding-bottom: 10px; margin-bottom: 20px;"><h2 style="font-size: 16px; font-weight: bold; color: #003882; text-transform: uppercase; margin: 0;">PHỤ LỤC (TIẾP THEO) - TRANG ${chunkIndex + 1}/${chunks.length}</h2><img src="./logo.png" style="width: 100px; height: auto;"></div>`;
                     return `<div class="html2pdf__page-break"></div><div style="width: 794px; height: 1122px; padding: 40px; box-sizing: border-box; background: white;">${pageHeaderHTML}<table style="width: 100%; border-collapse: collapse; border-radius: 8px; overflow: hidden;"><thead><tr style="background: #003882;"><th style="padding: 14px; text-align: center; font-size: 13px; font-weight: bold; color: white;">Thời gian quét</th><th style="padding: 14px; text-align: center; font-size: 13px; font-weight: bold; color: white;">Độ pH</th><th style="padding: 14px; text-align: center; font-size: 13px; font-weight: bold; color: white;">Độ mặn EC (ppt)</th><th style="padding: 14px; text-align: center; font-size: 13px; font-weight: bold; color: white;">Chỉ số ORP (mV)</th><th style="padding: 14px; text-align: center; font-size: 13px; font-weight: bold; color: white;">Nhiệt độ (°C)</th></tr></thead><tbody>${rowsHTML}</tbody></table></div>`;
                 }).join('');
@@ -756,7 +619,55 @@
                 const opt = { margin: 0, filename: `WioT_ChungThu_Ao${activePond}_${DEVICE_ID}.pdf`, image: { type: 'jpeg', quality: 0.98 }, pagebreak: { mode: ['css'] }, html2canvas: { scale: isMobile ? 1.5 : 2, useCORS: true, windowWidth: 794, width: 794, x: 0, y: 0, scrollX: 0, scrollY: 0, logging: false }, jsPDF: { unit: 'px', format: [794, 1123], orientation: 'portrait' } };
 
                 await html2pdf().set(opt).from(container.querySelector('#print-wrapper')).save(); document.body.removeChild(container);
-            } catch (error) { console.error("Lỗi xuất PDF:", error); alert("Đã xảy ra lỗi khi tạo chứng thư. Vui lòng kiểm tra lại kết nối mạng!"); } finally { btnElement.innerHTML = originalText; btnElement.disabled = false; }
+            } catch (error) { alert("Đã xảy ra lỗi khi tạo chứng thư. Vui lòng kiểm tra lại kết nối mạng!"); } finally { btnElement.innerHTML = originalText; btnElement.disabled = false; }
+        }
+
+        // =========================================================================
+        // 🤖 LOGIC CHAT WioT AI GEN
+        // =========================================================================
+        function sendAIMessage() {
+            const inputField = document.getElementById('userInput');
+            const text = inputField.value.trim();
+            if (!text) return;
+
+            appendChat('user', text);
+            inputField.value = '';
+            
+            const sendBtn = document.getElementById('sendBtn');
+            sendBtn.disabled = true;
+            sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+
+            google.script.run
+                .withSuccessHandler(function(response) {
+                    appendChat('ai', response);
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+                })
+                .withFailureHandler(function(error) {
+                    appendChat('ai', '⚠️ Lỗi kết nối: ' + error.message);
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+                })
+                .askGeminiFromWeb(text, DEVICE_ID);
+        }
+
+        function appendChat(sender, text) {
+            const chatBox = document.getElementById('chatBox');
+            const wrapper = document.createElement('div');
+            wrapper.className = `flex flex-col ${sender === 'user' ? 'items-end' : 'items-start'}`;
+            
+            const bubble = document.createElement('div');
+            bubble.innerHTML = text.replace(/\n/g, '<br>');
+            
+            if (sender === 'user') {
+                bubble.className = "bg-sky-600 text-white px-4 py-2.5 rounded-2xl rounded-tr-sm text-sm max-w-[85%] shadow-sm leading-relaxed";
+            } else {
+                bubble.className = "bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm max-w-[85%] shadow-sm leading-relaxed";
+            }
+            
+            wrapper.appendChild(bubble);
+            chatBox.appendChild(wrapper);
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
     </script>
 </body>
