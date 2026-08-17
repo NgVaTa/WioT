@@ -36,12 +36,20 @@
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
         @keyframes typing { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
+
+        /* =========================================================
+           🍏 ĐẶC TRỊ CHO IPHONE BOOKMARK (PWA SAFE AREA)
+           ========================================================= */
+        header { padding-top: max(1rem, env(safe-area-inset-top)) !important; }
+        nav { padding-bottom: env(safe-area-inset-bottom) !important; height: calc(65px + env(safe-area-inset-bottom)) !important; }
+        body { padding-bottom: calc(75px + env(safe-area-inset-bottom)) !important; }
+        #tab-ai { height: calc(100dvh - 215px - env(safe-area-inset-top) - env(safe-area-inset-bottom)) !important; margin-top: 5px; }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 pb-[70px] select-none">
+<body class="bg-slate-100 text-slate-800 select-none">
 
     <!-- HEADER -->
-    <header class="bg-sky-700 text-white p-4 sticky top-0 z-50 shadow-md h-[115px] box-border">
+    <header class="bg-sky-700 text-white p-4 sticky top-0 z-50 shadow-md box-border">
         <div class="flex justify-between items-center mb-3">
             <div class="flex items-center justify-start h-10 w-36 overflow-hidden flex-shrink-0">
                 <img src="./cover.png" alt="WioT Logo" class="w-full h-auto transform scale-[1.0] origin-center object-contain">
@@ -268,8 +276,8 @@
             </div>
         </section>
 
-        <!-- TAB 4: TRỢ LÝ AI (WioT Local AI Gen) ĐÃ FIX LỖI CHIỀU CAO -->
-        <section id="tab-ai" class="tab-content hidden animate-fade-in" style="height: calc(100dvh - 215px); margin-top: 5px;">
+        <!-- TAB 4: TRỢ LÝ AI CHAT -->
+        <section id="tab-ai" class="tab-content hidden animate-fade-in relative">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden relative">
                 
                 <div class="bg-sky-700 text-white p-3 text-center font-bold text-sm flex items-center justify-between shadow-sm z-10 shrink-0">
@@ -339,7 +347,7 @@
     </main>
 
     <!-- BOTTOM NAVIGATION -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] h-[65px] box-border">
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] box-border">
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn active flex-1 py-1 flex flex-col items-center justify-center text-xs font-medium text-slate-500 transition">
             <i class="fa-solid fa-chart-line text-lg mb-0.5"></i>
             <span>GIÁM SÁT</span>
