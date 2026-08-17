@@ -26,6 +26,16 @@
         .animate-fade-in { animation: fadeIn 0.4s ease-out forwards; }
         input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }
         input[type="password"]::-webkit-contacts-auto-fill-button, input[type="password"]::-webkit-credentials-auto-fill-button { visibility: hidden; pointer-events: none; position: absolute; right: 0; }
+        
+        /* Chat Scrollbar */
+        .chat-scroll::-webkit-scrollbar { width: 4px; }
+        .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        
+        /* Typing Indicator */
+        .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
+        .typing-dot:nth-child(1) { animation-delay: -0.32s; }
+        .typing-dot:nth-child(2) { animation-delay: -0.16s; }
+        @keyframes typing { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
 <body class="bg-slate-100 text-slate-800 pb-24 select-none">
@@ -84,7 +94,6 @@
                 </div>
             </div>
 
-            <!-- KHỐI BIỂU ĐỒ -->
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 mt-4">
                 <div class="flex justify-between items-center mb-4">
                     <div class="flex items-center">
@@ -115,7 +124,7 @@
                 </div>
                 <p id="pin-error-msg" class="text-rose-500 text-xs font-bold mb-4 opacity-0 transition-opacity">Mã PIN không chính xác!</p>
                 <button onclick="verifyOwnerPin()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 rounded-xl shadow-md transition duration-300 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-unlock-keyhole"></i> MỞ KHÓA HỆ THỐNG
+                    <i class="fa-solid fa-unlock-keyhole"></i> M mở KHÓA HỆ THỐNG
                 </button>
             </div>
 
@@ -260,24 +269,38 @@
         </section>
 
         <!-- TAB 4: TRỢ LÝ AI (WioT Local AI Gen) -->
-        <section id="tab-ai" class="tab-content space-y-4 hidden animate-fade-in" style="height: calc(100vh - 180px);">
-            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden">
-                <div class="bg-sky-700 text-white p-3 text-center font-bold text-sm flex items-center justify-center gap-2 shadow-sm z-10">
-                    <i class="fa-solid fa-robot text-lg"></i> KỸ SƯ THỦY SẢN ẢO
+        <section id="tab-ai" class="tab-content space-y-4 hidden animate-fade-in" style="height: calc(100vh - 135px);">
+            <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden relative">
+                
+                <div class="bg-sky-700 text-white p-3 text-center font-bold text-sm flex items-center justify-between shadow-sm z-10">
+                    <div class="flex items-center gap-2">
+                        <div class="relative">
+                            <i class="fa-solid fa-robot text-xl"></i>
+                            <span class="absolute -bottom-1 -right-1 w-2.5 h-2.5 bg-emerald-400 border-2 border-sky-800 rounded-full"></span>
+                        </div>
+                        <span class="tracking-wide">KỸ SƯ THỦY SẢN ẢO</span>
+                    </div>
+                    <button onclick="clearChat()" class="text-sky-200 hover:text-white transition" title="Xóa lịch sử trò chuyện">
+                        <i class="fa-solid fa-broom"></i>
+                    </button>
                 </div>
                 
-                <div id="chatBox" class="flex-1 p-4 overflow-y-auto space-y-4 bg-slate-50">
-                    <div class="flex flex-col items-start">
-                        <div class="bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm max-w-[85%] shadow-sm leading-relaxed">
-                            Chào bạn! Tôi là WioT Assistant, một người bạn đồng hành và là Kỹ sư Thủy sản ảo tận tâm của bạn. Tôi có thể giúp gì cho bạn hôm nay?
+                <div id="chatBox" class="flex-1 p-4 overflow-y-auto chat-scroll bg-slate-50 flex flex-col gap-3">
+                    <div class="flex flex-col items-start w-full">
+                        <div class="bg-white border border-slate-200 text-slate-700 px-4 py-3 rounded-2xl rounded-tl-sm text-[13px] max-w-[85%] shadow-sm leading-relaxed">
+                            Chào bạn! Tôi là WioT Assistant. Tôi đã sẵn sàng phân tích số liệu cảm biến và hỗ trợ kỹ thuật cho trang trại của bạn. Bạn cần tôi giúp gì?
                         </div>
                     </div>
                 </div>
                 
-                <div class="p-3 bg-white border-t border-slate-200 flex items-center gap-2">
-                    <input type="text" id="userInput" placeholder="Hỏi tôi về kỹ thuật ao nuôi..." onkeypress="if(event.key === 'Enter') sendAIMessage()" class="flex-1 bg-slate-100 border border-slate-200 rounded-full px-4 py-2.5 text-sm focus:outline-none focus:border-sky-500 focus:bg-white transition-all shadow-inner">
-                    <button id="sendBtn" onclick="sendAIMessage()" class="bg-sky-600 hover:bg-sky-700 text-white w-11 h-11 rounded-full flex items-center justify-center shadow-md transition-all shrink-0">
-                        <i class="fa-solid fa-paper-plane"></i>
+                <div class="p-3 bg-white border-t border-slate-200 flex items-end gap-2">
+                    <textarea id="userInput" rows="1" placeholder="Nhập câu hỏi tại đây..." 
+                        oninput="autoResize(this)" 
+                        onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendAIMessage(); }" 
+                        class="flex-1 bg-slate-100 border border-slate-200 rounded-2xl px-4 py-2.5 text-[13px] focus:outline-none focus:border-sky-500 focus:bg-white transition-all shadow-inner resize-none max-h-24"></textarea>
+                    
+                    <button id="sendBtn" onclick="sendAIMessage()" class="bg-sky-600 hover:bg-sky-700 text-white w-10 h-10 rounded-full flex items-center justify-center shadow-md transition-all shrink-0 self-end mb-0.5">
+                        <i class="fa-solid fa-paper-plane text-sm"></i>
                     </button>
                 </div>
             </div>
@@ -315,7 +338,7 @@
         </div>
     </main>
 
-    <!-- BOTTOM NAVIGATION THÊM TAB AI -->
+    <!-- BOTTOM NAVIGATION -->
     <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
         <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn active flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500 transition">
             <i class="fa-solid fa-chart-line text-lg mb-0.5"></i>
@@ -623,61 +646,97 @@
         }
 
         // =========================================================================
-        // 🤖 LOGIC CHAT WioT AI GEN (ĐÃ CHUYỂN ĐỔI SANG REST API)
+        // 🤖 LOGIC CHAT WioT AI GEN (TÍCH HỢP REST API VÀ GIAO DIỆN MỚI)
         // =========================================================================
+        function autoResize(textarea) {
+            textarea.style.height = 'auto';
+            textarea.style.height = textarea.scrollHeight + 'px';
+        }
+
+        function clearChat() {
+            document.getElementById('chatBox').innerHTML = `
+                <div class="flex flex-col items-start w-full">
+                    <div class="bg-white border border-slate-200 text-slate-700 px-4 py-3 rounded-2xl rounded-tl-sm text-[13px] max-w-[85%] shadow-sm leading-relaxed">
+                        Lịch sử trò chuyện đã được làm sạch. Bạn cần tôi giúp gì tiếp theo?
+                    </div>
+                </div>
+            `;
+        }
+
+        function showTyping() {
+            const chatBox = document.getElementById('chatBox');
+            const typingId = 'typing-' + Date.now();
+            const typingHtml = `
+                <div id="${typingId}" class="flex flex-col items-start w-full animate-fade-in">
+                    <div class="bg-white border border-slate-200 px-4 py-3.5 rounded-2xl rounded-tl-sm shadow-sm flex items-center gap-1.5">
+                        <div class="w-1.5 h-1.5 bg-sky-500 rounded-full typing-dot"></div>
+                        <div class="w-1.5 h-1.5 bg-sky-500 rounded-full typing-dot"></div>
+                        <div class="w-1.5 h-1.5 bg-sky-500 rounded-full typing-dot"></div>
+                    </div>
+                </div>
+            `;
+            chatBox.insertAdjacentHTML('beforeend', typingHtml);
+            chatBox.scrollTop = chatBox.scrollHeight;
+            return typingId;
+        }
+
+        function removeTyping(id) {
+            const el = document.getElementById(id);
+            if (el) el.remove();
+        }
+
         async function sendAIMessage() {
             const inputField = document.getElementById('userInput');
             const text = inputField.value.trim();
             if (!text) return;
 
-            // 1. Hiển thị tin nhắn của người dùng
             appendChat('user', text);
             inputField.value = '';
+            inputField.style.height = 'auto'; 
             
-            // 2. Vô hiệu hóa nút và hiện trạng thái Loading
             const sendBtn = document.getElementById('sendBtn');
             sendBtn.disabled = true;
-            sendBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i>';
+            sendBtn.classList.add('opacity-50');
+
+            const typingId = showTyping();
 
             try {
-                // 3. Đóng gói câu hỏi và gọi qua REST API (sử dụng encodeURIComponent để tránh lỗi font chữ)
                 const url = `${PROXY_URL}?action=ask_ai&device_id=${DEVICE_ID}&question=${encodeURIComponent(text)}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
-                // 4. Hiển thị phản hồi từ Kỹ sư ảo
+                removeTyping(typingId);
                 if (data.status === "SUCCESS") {
                     appendChat('ai', data.answer);
                 } else {
                     appendChat('ai', '⚠️ Máy chủ phản hồi lỗi: ' + (data.message || 'Không rõ nguyên nhân'));
                 }
             } catch (err) {
-                // 5. Xử lý khi mất mạng hoặc timeout
+                removeTyping(typingId);
                 appendChat('ai', '⚠️ Lỗi kết nối mạng: Không thể chạm tới Kỹ sư AI lúc này.');
-                console.error("AI Fetch Error:", err);
+                console.error(err);
             } finally {
-                // 6. Trả nút gửi về trạng thái ban đầu
                 sendBtn.disabled = false;
-                sendBtn.innerHTML = '<i class="fa-solid fa-paper-plane"></i>';
+                sendBtn.classList.remove('opacity-50');
             }
         }
 
         function appendChat(sender, text) {
             const chatBox = document.getElementById('chatBox');
-            const wrapper = document.createElement('div');
-            wrapper.className = `flex flex-col ${sender === 'user' ? 'items-end' : 'items-start'}`;
+            const isUser = sender === 'user';
             
-            const bubble = document.createElement('div');
-            bubble.innerHTML = text.replace(/\n/g, '<br>');
+            let formattedText = text.replace(/\n/g, '<br>');
+            formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+            const bubbleHtml = `
+                <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'} w-full animate-fade-in">
+                    <div class="${isUser ? 'bg-sky-600 text-white rounded-tr-sm' : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm'} px-4 py-3 rounded-2xl text-[13px] max-w-[85%] shadow-sm leading-relaxed break-words">
+                        ${formattedText}
+                    </div>
+                </div>
+            `;
             
-            if (sender === 'user') {
-                bubble.className = "bg-sky-600 text-white px-4 py-2.5 rounded-2xl rounded-tr-sm text-sm max-w-[85%] shadow-sm leading-relaxed";
-            } else {
-                bubble.className = "bg-white border border-slate-200 text-slate-700 px-4 py-2.5 rounded-2xl rounded-tl-sm text-sm max-w-[85%] shadow-sm leading-relaxed";
-            }
-            
-            wrapper.appendChild(bubble);
-            chatBox.appendChild(wrapper);
+            chatBox.insertAdjacentHTML('beforeend', bubbleHtml);
             chatBox.scrollTop = chatBox.scrollHeight;
         }
     </script>
