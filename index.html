@@ -2,7 +2,7 @@
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>WioT - Intelligent Control System</title>
 
     <link rel="icon" type="image/png" sizes="192x192" href="./favicon.png">
@@ -27,21 +27,21 @@
         input[type="password"]::-ms-reveal, input[type="password"]::-ms-clear { display: none; }
         input[type="password"]::-webkit-contacts-auto-fill-button, input[type="password"]::-webkit-credentials-auto-fill-button { visibility: hidden; pointer-events: none; position: absolute; right: 0; }
         
-        /* Chat Scrollbar */
+        /* Cấu hình thanh cuộn Tab AI */
         .chat-scroll::-webkit-scrollbar { width: 4px; }
         .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         
-        /* Typing Indicator */
+        /* Hiệu ứng Đang gõ (Typing Indicator) */
         .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
         @keyframes typing { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
     </style>
 </head>
-<body class="bg-slate-100 text-slate-800 pb-24 select-none">
+<body class="bg-slate-100 text-slate-800 pb-[70px] select-none">
 
     <!-- HEADER -->
-    <header class="bg-sky-700 text-white p-4 sticky top-0 z-50 shadow-md">
+    <header class="bg-sky-700 text-white p-4 sticky top-0 z-50 shadow-md h-[115px] box-border">
         <div class="flex justify-between items-center mb-3">
             <div class="flex items-center justify-start h-10 w-36 overflow-hidden flex-shrink-0">
                 <img src="./cover.png" alt="WioT Logo" class="w-full h-auto transform scale-[1.0] origin-center object-contain">
@@ -67,7 +67,7 @@
         </div>
     </header>
 
-    <main class="max-w-md mx-auto p-4 space-y-4 relative">
+    <main class="max-w-md mx-auto p-4 space-y-4 relative w-full box-border">
         
         <!-- TAB 1: GIÁM SÁT -->
         <section id="tab-dashboard" class="tab-content space-y-4 animate-fade-in">
@@ -124,7 +124,7 @@
                 </div>
                 <p id="pin-error-msg" class="text-rose-500 text-xs font-bold mb-4 opacity-0 transition-opacity">Mã PIN không chính xác!</p>
                 <button onclick="verifyOwnerPin()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 rounded-xl shadow-md transition duration-300 flex items-center justify-center gap-2">
-                    <i class="fa-solid fa-unlock-keyhole"></i> M mở KHÓA HỆ THỐNG
+                    <i class="fa-solid fa-unlock-keyhole"></i> MỞ KHÓA HỆ THỐNG
                 </button>
             </div>
 
@@ -268,11 +268,11 @@
             </div>
         </section>
 
-        <!-- TAB 4: TRỢ LÝ AI (WioT Local AI Gen) -->
-        <section id="tab-ai" class="tab-content space-y-4 hidden animate-fade-in" style="height: calc(100vh - 135px);">
+        <!-- TAB 4: TRỢ LÝ AI (WioT Local AI Gen) ĐÃ FIX LỖI CHIỀU CAO -->
+        <section id="tab-ai" class="tab-content hidden animate-fade-in" style="height: calc(100dvh - 215px); margin-top: 5px;">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden relative">
                 
-                <div class="bg-sky-700 text-white p-3 text-center font-bold text-sm flex items-center justify-between shadow-sm z-10">
+                <div class="bg-sky-700 text-white p-3 text-center font-bold text-sm flex items-center justify-between shadow-sm z-10 shrink-0">
                     <div class="flex items-center gap-2">
                         <div class="relative">
                             <i class="fa-solid fa-robot text-xl"></i>
@@ -285,7 +285,7 @@
                     </button>
                 </div>
                 
-                <div id="chatBox" class="flex-1 p-4 overflow-y-auto chat-scroll bg-slate-50 flex flex-col gap-3">
+                <div id="chatBox" class="flex-1 p-4 overflow-y-auto chat-scroll bg-slate-50 flex flex-col gap-3 pb-6">
                     <div class="flex flex-col items-start w-full">
                         <div class="bg-white border border-slate-200 text-slate-700 px-4 py-3 rounded-2xl rounded-tl-sm text-[13px] max-w-[85%] shadow-sm leading-relaxed">
                             Chào bạn! Tôi là WioT Assistant. Tôi đã sẵn sàng phân tích số liệu cảm biến và hỗ trợ kỹ thuật cho trang trại của bạn. Bạn cần tôi giúp gì?
@@ -293,7 +293,7 @@
                     </div>
                 </div>
                 
-                <div class="p-3 bg-white border-t border-slate-200 flex items-end gap-2">
+                <div class="p-3 bg-white border-t border-slate-200 flex items-end gap-2 shrink-0">
                     <textarea id="userInput" rows="1" placeholder="Nhập câu hỏi tại đây..." 
                         oninput="autoResize(this)" 
                         onkeypress="if(event.key === 'Enter' && !event.shiftKey) { event.preventDefault(); sendAIMessage(); }" 
@@ -339,20 +339,20 @@
     </main>
 
     <!-- BOTTOM NAVIGATION -->
-    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)]">
-        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn active flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500 transition">
+    <nav class="fixed bottom-0 left-0 right-0 bg-white border-t border-slate-200 flex justify-around p-2 z-50 shadow-[0_-4px_6px_-1px_rgba(0,0,0,0.05)] h-[65px] box-border">
+        <button onclick="switchTab('dashboard')" id="nav-dashboard" class="tab-btn active flex-1 py-1 flex flex-col items-center justify-center text-xs font-medium text-slate-500 transition">
             <i class="fa-solid fa-chart-line text-lg mb-0.5"></i>
             <span>GIÁM SÁT</span>
         </button>
-        <button onclick="switchTab('control')" id="nav-control" class="tab-btn flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500 transition">
+        <button onclick="switchTab('control')" id="nav-control" class="tab-btn flex-1 py-1 flex flex-col items-center justify-center text-xs font-medium text-slate-500 transition">
             <i class="fa-solid fa-sliders text-lg mb-0.5"></i>
             <span>ĐIỀU KHIỂN</span>
         </button>
-        <button onclick="switchTab('passport')" id="nav-passport" class="tab-btn flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500 transition">
+        <button onclick="switchTab('passport')" id="nav-passport" class="tab-btn flex-1 py-1 flex flex-col items-center justify-center text-xs font-medium text-slate-500 transition">
             <i class="fa-solid fa-qrcode text-lg mb-0.5"></i>
             <span>HỘ CHIẾU SỐ</span>
         </button>
-        <button onclick="switchTab('ai')" id="nav-ai" class="tab-btn flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500 transition">
+        <button onclick="switchTab('ai')" id="nav-ai" class="tab-btn flex-1 py-1 flex flex-col items-center justify-center text-xs font-medium text-slate-500 transition">
             <i class="fa-solid fa-robot text-lg mb-0.5"></i>
             <span>AI GEN</span>
         </button>
