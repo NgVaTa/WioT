@@ -28,18 +28,17 @@
         input[type="password"]::-webkit-contacts-auto-fill-button, input[type="password"]::-webkit-credentials-auto-fill-button { visibility: hidden; pointer-events: none; position: absolute; right: 0; }
         
         /* Cấu hình thanh cuộn Tab AI */
+        .chat-scroll { scroll-behavior: smooth; }
         .chat-scroll::-webkit-scrollbar { width: 4px; }
         .chat-scroll::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         
-        /* Hiệu ứng Đang gõ (Typing Indicator) */
+        /* Hiệu ứng đang gõ (Typing Indicator) */
         .typing-dot { animation: typing 1.4s infinite ease-in-out both; }
         .typing-dot:nth-child(1) { animation-delay: -0.32s; }
         .typing-dot:nth-child(2) { animation-delay: -0.16s; }
         @keyframes typing { 0%, 80%, 100% { transform: scale(0); opacity: 0.5; } 40% { transform: scale(1); opacity: 1; } }
 
-        /* =========================================================
-           🍏 ĐẶC TRỊ CHO IPHONE BOOKMARK (PWA SAFE AREA)
-           ========================================================= */
+        /* CẤU TRÚC CHO IPHONE BOOKMARK (PWA SAFE AREA) */
         header { padding-top: max(1rem, env(safe-area-inset-top)) !important; }
         nav { padding-bottom: env(safe-area-inset-bottom) !important; height: calc(65px + env(safe-area-inset-bottom)) !important; }
         body { padding-bottom: calc(75px + env(safe-area-inset-bottom)) !important; }
@@ -158,11 +157,12 @@
                             <span>THIẾT BỊ DÀNH RIÊNG CHO AO NUÔI 1</span>
                             <i class="fa-solid fa-sliders"></i>
                         </h3>
+                        <!-- Rơ-le điều khiển -->
                         <div class="flex justify-between items-center p-2 rounded-xl hover:bg-slate-50">
                             <div class="flex items-center space-x-3">
                                 <div class="p-2.5 bg-sky-100 text-sky-600 rounded-lg"><i class="fa-solid fa-faucet-drip"></i></div>
                                 <div>
-                                    <p id="label-relay-van" class="font-bold text-sm text-slate-800">Van Điện Ao 1 (Y0)</p>
+                                    <p id="label-relay-van" class="font-bold text-sm text-slate-800">Van điện Ao 1 (Y0)</p>
                                     <p class="text-[10px] text-slate-400">Van cấp nước vào ao nuôi</p>
                                 </div>
                             </div>
@@ -368,6 +368,7 @@
 
     <!-- LOGIC SCRIPT -->
     <script>
+        // Cấu hình End-point API (Đã giữ nguyên cấu trúc Cloudflare Proxy của bạn)
         const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev/"; 
         
         const urlParams = new URLSearchParams(window.location.search);
@@ -396,9 +397,9 @@
             rules: [
                 { check: (data) => data.ph < 7.5, diagnosis: "Độ pH giảm mạnh (< 7.5). Môi trường axit hóa, tôm khó lột xác, khí độc H2S dễ bùng phát.", actionText: "Khuyến nghị: Đánh vôi (CaCO3/Dolomite) 15-20kg/1000m3. Bật 100% quạt nước để xua khí độc." },
                 { check: (data) => data.ph > 8.5, diagnosis: "Độ pH tăng cao (> 8.5). Độc tính của khí NH3 tăng, gây ngạt và stress cho tôm.", actionText: "Khuyến nghị: Xả bớt nước tầng mặt, thay 20% nước mới. Giảm lượng thức ăn." },
-                { check: (data) => data.temp < 25, diagnosis: "Nhiệt độ giảm đột ngột (< 25°C). Tôm giảm ăn, trao đổi chất chậm. Nguy cơ Đốm trắng.", actionText: "Khuyến nghị: Giảm 30-50% lượng thức ăn tránh dư thừa. Bổ sung Vitamin C." },
-                { check: (data) => data.temp > 32, diagnosis: "Nhiệt độ tăng cao (> 32°C). Oxy hòa tan giảm mạnh. Khu khuẩn Vibrio dễ bùng phát.", actionText: "Khuyến nghị: Bật toàn bộ sục khí và quạt nước. Xem xét nâng mức nước ao lên 1.2m - 1.5m." },
-                { check: (data) => data.orp >= 150 && data.orp <= 200, diagnosis: "ORP suy giảm (150-200mV). Đáy ao bắt đầu tích tụ chất thải hữu cơ.", actionText: "Khuyến nghị: Xi-phông hút đáy nhẹ nhàng. Cắt cử ăn 1 bữa. Bổ sung vi sinh xử lý đáy." },
+                { check: (data) => data.temp < 25, diagnosis: "Nhiệt độ giảm đột ngột (< 25°C). Tôm giảm ăn, trao đổi chất chậm. Nguy cơ đốm trắng.", actionText: "Khuyến nghị: Giảm 30-50% lượng thức ăn tránh dư thừa. Bổ sung Vitamin C." },
+                { check: (data) => data.temp > 32, diagnosis: "Nhiệt độ tăng cao (> 32°C). Oxy hòa tan giảm mạnh. Khuẩn khuẩn Vibrio dễ bùng phát.", actionText: "Khuyến nghị: Bật toàn bộ sục khí và quạt nước. Xem xét nâng mức nước ao lên 1.2m - 1.5m." },
+                { check: (data) => data.orp >= 150 && data.orp <= 200, diagnosis: "ORP suy giảm (150-200mV). Đáy ao bắt đầu tích tụ chất thải hữu cơ.", actionText: "Khuyến nghị: Xi-phông hút đáy nhẹ nhàng. Cắt cữ ăn 1 bữa. Bổ sung vi sinh xử lý đáy." },
                 { check: (data) => data.orp < 150, diagnosis: "ORP cực thấp (< 150mV). Môi trường yếm khí nặng, sinh khí H2S kịch độc.", actionText: "Khuyến nghị: Xi-phông xả đáy khẩn cấp. Rải thuốc tím (KMnO4) hoặc Yucca." },
                 { check: (data) => data.ec < 10, diagnosis: "Độ mặn (EC) thấp (< 10 ppt). Tôm dễ sốc thẩm thấu, đục cơ, mềm vỏ.", actionText: "Khuyến nghị: Tạt vôi Canxi và khoáng tạt xuống ao để giúp tôm cứng vỏ." }
             ]
@@ -460,6 +461,7 @@
             if (tabParam) switchTab(tabParam);
             
             fetchTelemetryData();
+            // Tối ưu hóa Dashboard: Lấy dữ liệu mỗi 5s
             setInterval(fetchTelemetryData, 5000);
             setTimeout(loadHealthChart, 1000);
         });
@@ -522,7 +524,7 @@
             const aiPanel = document.getElementById('ai-local-panel'); if (aiPanel) aiPanel.remove();
 
             document.getElementById('ctrl-section-title').children[0].innerText = `THIẾT BỊ DÀNH RIÊNG CHO ${pondInfo.name}`;
-            document.getElementById('label-relay-van').innerText = `Van Điện ${pondInfo.name} (${pondInfo.van})`;
+            document.getElementById('label-relay-van').innerText = `Van điện ${pondInfo.name} (${pondInfo.van})`;
             document.getElementById('label-relay-quat').innerText = `Dàn Quạt Nước ${pondInfo.name} (${pondInfo.quat})`;
             document.getElementById('label-relay-xaday').innerText = `Bơm Xả Đáy ${pondInfo.name} (${pondInfo.xaday})`;
             document.getElementById('chk-relay-van').checked = false; document.getElementById('chk-relay-quat').checked = false; document.getElementById('chk-relay-xaday').checked = false;
@@ -615,9 +617,9 @@
                         let diagHTML = ""; const ph = parseFloat(latest.ph) || 0, temp = parseFloat(latest.temp) || 0, orp = parseFloat(latest.orp) || 0, ec = parseFloat(latest.ec) || 0;
                         if (ph < 7.0 || ph > 9.0) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-triangle-exclamation mr-1"></i>pH Nguy hiểm (${ph})</span>`; else if (ph < 7.5 || ph > 8.5) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-circle-exclamation mr-1"></i>pH Khá xấu (${ph})</span>`;
                         if (temp < 24 || temp > 34) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-temperature-arrow-up mr-1"></i>Nhiệt độ Sốc (${temp}°C)</span>`; else if (temp < 26 || temp > 32) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-temperature-half mr-1"></i>Nhiệt độ Bất lợi (${temp}°C)</span>`;
-                        if (orp < 150) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-skull-crossbones mr-1"></i>Đáy ao độc hại (${orp}mV)</span>`; else if (orp < 200) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-water mr-1"></i>Đáy ao bẩn (${orp}mV)</span>`;
+                        if (orp < 150) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-skull-crossbones mr-1"></i>Đáy ao có hại (${orp}mV)</span>`; else if (orp < 200) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-water mr-1"></i>Đáy ao bẩn (${orp}mV)</span>`;
                         if (ec < 5 || ec > 35) diagHTML += `<span class="bg-rose-100 text-rose-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-droplet mr-1"></i>Độ mặn Sốc (${ec}ppt)</span>`; else if (ec < 10 || ec > 30) diagHTML += `<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-droplet mr-1"></i>Độ mặn Bất lợi (${ec}ppt)</span>`;
-                        if (diagHTML === "") diagHTML = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-check-circle mr-1"></i>Các chỉ số sinh hóa lý tưởng</span>`;
+                        if (diagHTML === "") diagHTML = `<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded text-[11px] font-bold"><i class="fa-solid fa-check-circle mr-1"></i>Các chỉ số sinh hóa lý tốt</span>`;
                         diagEl.innerHTML = diagHTML; diagEl.classList.remove('hidden');
                     }
                 }
@@ -654,7 +656,7 @@
         }
 
         // =========================================================================
-        // 🤖 LOGIC CHAT WioT AI GEN (TÍCH HỢP REST API VÀ GIAO DIỆN MỚI)
+        // 🧠 LOGIC CHAT WioT AI GEN (ĐÃ ĐƯỢC CHUYÊN GIA TỐI ƯU HÓA)
         // =========================================================================
         function autoResize(textarea) {
             textarea.style.height = 'auto';
@@ -684,6 +686,7 @@
                 </div>
             `;
             chatBox.insertAdjacentHTML('beforeend', typingHtml);
+            // Kéo màn hình xuống điểm đang gõ
             chatBox.scrollTop = chatBox.scrollHeight;
             return typingId;
         }
@@ -698,34 +701,43 @@
             const text = inputField.value.trim();
             if (!text) return;
 
+            // 1. Hiển thị tin nhắn người dùng
             appendChat('user', text);
             inputField.value = '';
             inputField.style.height = 'auto'; 
             
+            // 2. Tạm khóa giao diện
             const sendBtn = document.getElementById('sendBtn');
             sendBtn.disabled = true;
             sendBtn.classList.add('opacity-50');
+            inputField.disabled = true;
 
+            // 3. Gọi trạng thái "Đang phản hồi..."
             const typingId = showTyping();
 
             try {
+                // Gọi tới Cloudflare Proxy để vòng tránh lỗi CORS
                 const url = `${PROXY_URL}?action=ask_ai&device_id=${DEVICE_ID}&question=${encodeURIComponent(text)}`;
                 const response = await fetch(url);
                 const data = await response.json();
 
                 removeTyping(typingId);
+                
                 if (data.status === "SUCCESS") {
                     appendChat('ai', data.answer);
                 } else {
-                    appendChat('ai', '⚠️ Máy chủ phản hồi lỗi: ' + (data.message || 'Không rõ nguyên nhân'));
+                    appendChat('ai', '⚠️ Máy chủ phản hồi lỗi: ' + (data.message || 'Không rõ nguyên nhân. Vui lòng thử lại.'));
                 }
             } catch (err) {
                 removeTyping(typingId);
-                appendChat('ai', '⚠️ Lỗi kết nối mạng: Không thể chạm tới Kỹ sư AI lúc này.');
+                appendChat('ai', '🌐 Lỗi kết nối mạng: Không thể chạm tới Kỹ sư AI lúc này.');
                 console.error(err);
             } finally {
+                // 4. Mở khóa giao diện
                 sendBtn.disabled = false;
                 sendBtn.classList.remove('opacity-50');
+                inputField.disabled = false;
+                inputField.focus();
             }
         }
 
@@ -733,8 +745,15 @@
             const chatBox = document.getElementById('chatBox');
             const isUser = sender === 'user';
             
+            // Tối ưu hóa Markdown Parser (Chuyển đổi văn bản Gemini thành HTML đẹp mắt)
             let formattedText = text.replace(/\n/g, '<br>');
+            // Định dạng in đậm
             formattedText = formattedText.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+            // Định dạng danh sách (Bullet points)
+            formattedText = formattedText.replace(/\* (.*?)(<br>|$)/g, '<li class="ml-4 mb-1">$1</li>');
+            if (formattedText.includes('<li')) {
+                formattedText = formattedText.replace(/(<li.*<\/li>)/, '<ul class="list-disc my-2">$1</ul>');
+            }
 
             const bubbleHtml = `
                 <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'} w-full animate-fade-in">
@@ -745,7 +764,12 @@
             `;
             
             chatBox.insertAdjacentHTML('beforeend', bubbleHtml);
-            chatBox.scrollTop = chatBox.scrollHeight;
+            
+            // Cập nhật cuộn mượt
+            chatBox.scrollTo({
+                top: chatBox.scrollHeight,
+                behavior: 'smooth'
+            });
         }
     </script>
 </body>
