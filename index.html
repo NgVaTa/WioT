@@ -60,7 +60,7 @@
             <div id="monitor-cards-grid" class="grid grid-cols-2 gap-3"><div class="col-span-2 text-center text-gray-400 py-10"><i class="fa-solid fa-spinner fa-spin text-2xl mb-2"></i><br>Hệ thống đang đồng bộ...</div></div>
 
             <div class="bg-white rounded-2xl p-4 shadow-sm border border-slate-200 mt-4">
-                <div class="flex justify-between items-center mb-4"><div class="flex items-center"><i class="fa-solid fa-chart-area text-sky-600 text-lg mr-2"></i><h3 class="font-black text-slate-800 text-xs uppercase tracking-wide">BIỂU ĐỒ (80 BẢN GHI)</h3></div><button onclick="forceRefreshData()" id="btn-load-chart" class="px-3 py-1 bg-sky-100 text-sky-700 text-[10px] font-bold rounded-lg transition">ĐỒNG BỘ LẠI</button></div>
+                <div class="flex justify-between items-center mb-4"><div class="flex items-center"><i class="fa-solid fa-chart-area text-sky-600 text-lg mr-2"></i><h3 class="font-black text-slate-800 text-xs uppercase tracking-wide">BIỂU ĐỒ (80 BẢN GHI)</h3></div><button onclick="forceRefreshData()" id="btn-load-chart" class="px-3 py-1 bg-sky-100 hover:bg-sky-200 text-sky-700 text-[10px] font-bold rounded-lg transition">ĐỒNG BỘ LẠI</button></div>
                 <div class="relative w-full h-56"><canvas id="healthChart"></canvas></div>
             </div>
         </section>
@@ -87,6 +87,7 @@
                         <div class="flex justify-between items-center p-2"><div class="flex items-center space-x-3"><div class="p-2.5 bg-amber-100 text-amber-600 rounded-lg"><i class="fa-solid fa-fan"></i></div><div><p id="label-relay-quat" class="font-bold text-sm text-slate-800">Dàn Quạt Nước Ao 1 (Y10)</p></div></div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" onchange="triggerRelay1Way('quat', this.checked)" class="sr-only peer"><div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div></label></div>
                         <div class="flex justify-between items-center p-2"><div class="flex items-center space-x-3"><div class="p-2.5 bg-purple-100 text-purple-600 rounded-lg"><i class="fa-solid fa-dumpster"></i></div><div><p id="label-relay-xaday" class="font-bold text-sm text-slate-800">Bơm Xả Đáy Ao 1 (Y14)</p></div></div><label class="relative inline-flex items-center cursor-pointer"><input type="checkbox" onchange="triggerRelay1Way('xaday', this.checked)" class="sr-only peer"><div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-slate-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-500"></div></label></div>
                     </div>
+
                     <div class="bg-white rounded-2xl p-4 shadow-sm space-y-3 border border-slate-200">
                         <h3 class="font-bold text-slate-700 text-xs uppercase tracking-wider border-b pb-2">Bơm & Van Trung Tâm</h3>
                         <div class="grid grid-cols-2 gap-2 text-xs">
@@ -116,9 +117,9 @@
         </section>
 
         <!-- TAB 4: TRỢ LÝ AI CHAT -->
-        <section id="tab-ai" class="tab-content hidden animate-fade-in relative">
+        <section id="tab-ai" class="tab-content hidden relative">
             <div class="bg-white rounded-2xl shadow-sm border border-slate-200 flex flex-col h-full overflow-hidden relative">
-                <div class="bg-sky-700 text-white p-3 text-center font-bold text-sm flex items-center justify-between"><div class="flex items-center gap-2"><i class="fa-solid fa-robot text-xl"></i><span>KỸ SƯ THỦY SẢN ẢO</span></div><button onclick="clearChat()" class="text-sky-200 hover:text-white"><i class="fa-solid fa-broom"></i></button></div>
+                <div class="bg-sky-700 text-white p-3 text-center font-bold text-sm flex items-center justify-between shadow-sm z-10 shrink-0"><div class="flex items-center gap-2"><i class="fa-solid fa-robot text-xl"></i><span class="tracking-wide">KỸ SƯ THỦY SẢN ẢO</span></div><button onclick="clearChat()" class="text-sky-200 hover:text-white transition"><i class="fa-solid fa-broom"></i></button></div>
                 <div id="chatBox" class="flex-1 p-4 overflow-y-auto chat-scroll bg-slate-50 flex flex-col gap-3 pb-6">
                     <div class="flex flex-col items-start w-full"><div class="bg-white border text-slate-700 px-4 py-3 rounded-2xl rounded-tl-sm text-[13px] max-w-[85%] shadow-sm">Chào bạn! Tôi là WioT Assistant. Tôi đã sẵn sàng phân tích số liệu cảm biến và hỗ trợ kỹ thuật cho trang trại của bạn. Bạn cần tôi giúp gì?</div></div>
                 </div>
@@ -139,7 +140,7 @@
                     <div><label class="block text-[10px] font-bold text-slate-500 mb-1">MÃ PIN MỚI</label><input type="password" id="cp-new" inputmode="numeric" maxlength="4" class="w-full bg-slate-50 border rounded-xl p-3 text-center text-xl tracking-widest focus:outline-none"></div>
                     <div><label class="block text-[10px] font-bold text-slate-500 mb-1">XÁC NHẬN MÃ PIN MỚI</label><input type="password" id="cp-confirm" inputmode="numeric" maxlength="4" class="w-full bg-slate-50 border rounded-xl p-3 text-center text-xl tracking-widest focus:outline-none"></div>
                     <p id="cp-error" class="text-rose-500 text-xs font-bold text-center hidden"></p><p id="cp-success" class="text-emerald-500 text-xs font-bold text-center hidden">Đổi mã PIN thành công!</p>
-                    <button id="btn-submit-pin" onclick="submitChangePin()" class="w-full bg-sky-600 hover:bg-sky-700 text-white font-bold py-3.5 rounded-xl transition">XÁC NHẬN ĐỔI PIN</button>
+                    <button id="btn-submit-pin" onclick="submitChangePin()" class="w-full bg-sky-600 text-white font-bold py-3.5 rounded-xl transition">XÁC NHẬN ĐỔI PIN</button>
                 </div>
             </div>
         </div>
@@ -152,7 +153,7 @@
         <button onclick="switchTab('ai')" id="nav-ai" class="tab-btn flex-1 py-1 flex flex-col items-center text-xs font-medium text-slate-500"><i class="fa-solid fa-robot text-lg mb-0.5"></i><span>AI GEN</span></button>
     </nav>
 
-    <!-- LOGIC SCRIPT BẢN ỔN ĐỊNH + KẾT NỐI 1 CHIỀU -->
+    <!-- LOGIC SCRIPT BẢN ỔN ĐỊNH V6.1 + KẾT NỐI 1 CHIỀU -->
     <script>
         const PROXY_URL = "https://wiot-proxy.team-e11.workers.dev/"; 
         const urlParams = new URLSearchParams(window.location.search);
@@ -194,7 +195,10 @@
             if (roleParam === 'guest') { isGuestMode = true; document.getElementById('nav-control').style.display = 'none'; }
             
             const pondParam = urlParams.get('pond');
-            if (pondParam) changeActivePond(pondParam); else { fetchInitData(); generateQRCode(); }
+            if (pondParam) activePond = pondParam; 
+            
+            fetchInitData(); 
+            generateQRCode(); // Khôi phục mã QR
             
             const tabParam = urlParams.get('tab');
             if (tabParam) switchTab(tabParam);
@@ -298,7 +302,7 @@
 
         async function downloadCertificatePDF(btnElement) {
             if (sharedHistoryData.length === 0) { alert(`Không có dữ liệu!`); return; }
-            const originalText = btnElement.innerHTML; btnElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẠO PDF...`; btnElement.disabled = true;
+            const originalText = btnElement.innerHTML; btnElement.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> ĐANG TẠO...`; btnElement.disabled = true;
             try {
                 const currentScore = parseInt(document.getElementById('ui-passport-wqi').innerText) || 100;
                 const wqiColor = currentScore >= 70 ? '#10b981' : '#f59e0b'; const wqiText = currentScore >= 70 ? 'ĐẠT CHUẨN XUẤT KHẨU' : 'CẦN CẢI THIỆN MÔI TRƯỜNG';
@@ -356,6 +360,7 @@
         function switchTab(tabName) { document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden')); document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active')); document.getElementById(`tab-${tabName}`).classList.remove('hidden'); document.getElementById(`nav-${tabName}`).classList.add('active'); }
         function changeActivePond(pondVal) { activePond = pondVal; const pondInfo = POND_RELAY_MAP[activePond]; document.getElementById('dash-pond-title').innerText = pondInfo.name; document.getElementById('ctrl-section-title').children[0].innerText = `THIẾT BỊ CHO ${pondInfo.name}`; document.getElementById('label-relay-van').innerText = `Van điện (${pondInfo.van})`; document.getElementById('label-relay-quat').innerText = `Quạt Nước (${pondInfo.quat})`; document.getElementById('label-relay-xaday').innerText = `Bơm Xả (${pondInfo.xaday})`; document.getElementById('ui-passport-pond').innerText = `AO NUÔI ${activePond}`; fetchInitData(); generateQRCode(); }
         function generateQRCode() { const qrContainer = document.getElementById("qrcode"); qrContainer.innerHTML = ""; new QRCode(qrContainer, { text: `${window.location.origin}${window.location.pathname}?device=${DEVICE_ID}&pond=${activePond}&tab=passport&role=guest`, width: 150, height: 150, colorDark : "#0f172a", colorLight : "#ffffff", correctLevel : QRCode.CorrectLevel.H }); }
+        
         function toggleManualMode1Way() {
             isManualMode = !isManualMode;
             const btn = document.getElementById('btn-manual-toggle'), iconBox = document.getElementById('manual-icon-box'), icon = document.getElementById('manual-icon'), title = document.getElementById('manual-status-title'), desc = document.getElementById('manual-status-desc'), badge = document.getElementById('manual-badge'), panelContainer = document.getElementById('control-panel-container');
@@ -372,7 +377,7 @@
         function send1WayCommand(relayId, state) { if (isGuestMode || !isControlUnlocked) return; fetch(`${PROXY_URL}?action=set_command&device_id=${DEVICE_ID}&relay_id=${relayId}&target_state=${state}`).catch(e => {}); }
 
         // =========================================================
-        // 🧠 KỸ SƯ AI CHATBOT (KHÔI PHỤC HOÀN TOÀN)
+        // 🧠 KỸ SƯ AI CHATBOT
         // =========================================================
         function autoResize(textarea) { textarea.style.height = 'auto'; textarea.style.height = textarea.scrollHeight + 'px'; }
         function clearChat() { document.getElementById('chatBox').innerHTML = `<div class="flex flex-col items-start w-full"><div class="bg-white border border-slate-200 text-slate-700 px-4 py-3 rounded-2xl rounded-tl-sm text-[13px] max-w-[85%] shadow-sm">Đã xóa lịch sử. Bạn cần tôi giúp gì?</div></div>`; }
