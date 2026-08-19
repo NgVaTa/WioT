@@ -553,14 +553,32 @@
             } catch (err) {} finally { btn.innerHTML = '<i class="fa-solid fa-rotate"></i> TẢI LẠI'; }
         }
 
+       let fetchErrorCount = 0; // Thêm biến đếm lỗi
+
         async function fetchTelemetryData() {
             try {
                 const url = `${PROXY_URL}?action=get_dashboard&device_id=${DEVICE_ID}`;
-                const response = await fetch(url); const data = await response.json();
+                
+                // Đặt giới hạn timeout (Tắt kết nối nếu đợi quá 8s để tránh treo app)
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000); 
+
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
+                const data = await response.json();
+                
                 if (data.status === "ERROR") {
-                    document.getElementById('monitor-cards-grid').innerHTML = `<div class="col-span-2 text-center text-rose-600 py-8 bg-rose-50 rounded-2xl border border-rose-200"><i class="fa-solid fa-triangle-exclamation text-3xl mb-3"></i><br><span class="font-bold text-sm leading-snug block px-4">${data.message}</span></div>`;
-                    const chartBtn = document.getElementById('btn-load-chart'); if(chartBtn) chartBtn.innerHTML = '<i class="fa-solid fa-rotate"></i> LỖI DỮ LIỆU'; return;
+                    fetchErrorCount++;
+                    // Chỉ báo lỗi đỏ lòm nếu rớt mạng 3 lần liên tiếp (15 giây)
+                    if (fetchErrorCount >= 3) {
+                        document.getElementById('monitor-cards-grid').innerHTML = `<div class="col-span-2 text-center text-rose-600 py-8 bg-rose-50 rounded-2xl border border-rose-200"><i class="fa-solid fa-triangle-exclamation text-3xl mb-3"></i><br><span class="font-bold text-sm leading-snug block px-4">${data.message}</span></div>`;
+                    }
+                    return;
                 }
+                
+                fetchErrorCount = 0; // Thành công thì reset bộ đếm lỗi
+                
                 if (data.owner_pin) OWNER_PIN = data.owner_pin;
                 const pondKey = `pond${activePond}`; const pondData = data[pondKey];
 
@@ -575,7 +593,12 @@
                     document.getElementById('monitor-cards-grid').innerHTML = phCard + orpCard + ecCard + tempCard;
                     runLocalAIAssistant(ph, temp, orp, ec);
                 }
-            } catch (error) { document.getElementById('monitor-cards-grid').innerHTML = `<div class="col-span-2 text-center text-rose-500 py-10 font-bold"><i class="fa-solid fa-wifi text-2xl mb-2"></i><br>Lỗi kết nối máy chủ!</div>`; }
+            } catch (error) { 
+                fetchErrorCount++;
+                if (fetchErrorCount >= 3) {
+                    document.getElementById('monitor-cards-grid').innerHTML = `<div class="col-span-2 text-center text-rose-500 py-10 font-bold"><i class="fa-solid fa-wifi text-2xl mb-2"></i><br>Lỗi kết nối máy chủ! Đang thử lại...</div>`; 
+                }
+            }
         }
 
         function toggleManualMode1Way() {
