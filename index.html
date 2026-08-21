@@ -396,12 +396,41 @@
         }
         
         function appendChat(sender, text) {
-            const chatBox = document.getElementById('chatBox'); const isUser = sender === 'user';
-            let fmt = text.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>').replace(/\* (.*?)(<br>|$)/g, '<li class="ml-4 mb-1">$1</li>');
-            if (fmt.includes('<li')) { fmt = fmt.replace(/(<li.*<\/li>)/, '<ul class="list-disc my-2">$1</ul>'); }
-            chatBox.insertAdjacentHTML('beforeend', `<div class="flex flex-col ${isUser ? 'items-end' : 'items-start'} w-full animate-fade-in"><div class="${isUser ? 'bg-sky-600 text-white rounded-tr-sm' : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm'} px-4 py-3 rounded-2xl text-[13px] max-w-[85%] shadow-sm leading-relaxed break-words">${fmt}</div></div>`);
-            chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+    const chatBox = document.getElementById('chatBox'); 
+    const isUser = sender === 'user';
+    
+    let fmt = text;
+
+    if (!isUser) {
+        // 1. Dọn dẹp sạch sẽ rác LaTeX và Markdown Heading
+        fmt = fmt.replace(/\$([^$]+)\$/g, '$1')              // Xóa $...$
+                 .replace(/\\text\{([^}]+)\}/g, '$1')        // Xóa \text{...}
+                 .replace(/^###?\s*(.*$)/gim, '<strong>$1</strong>') // Đổi ### thành in đậm
+                 .replace(/`([^`]+)`/g, '$1')                // Xóa backtick `...`
+                 .replace(/NH_3/g, 'NH3').replace(/CO_2/g, 'CO2').replace(/H_2S/g, 'H2S'); // Chuẩn hóa hóa học
+
+        // 2. Format HTML cơ bản
+        fmt = fmt.replace(/\n/g, '<br>')
+                 .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                 .replace(/\* (.*?)(<br>|$)/g, '<li class="ml-4 mb-1">$1</li>');
+
+        if (fmt.includes('<li')) { 
+            fmt = fmt.replace(/(<li.*<\/li>)/, '<ul class="list-disc my-2">$1</ul>'); 
         }
+    } else {
+        fmt = fmt.replace(/\n/g, '<br>');
+    }
+
+    chatBox.insertAdjacentHTML('beforeend', `
+        <div class="flex flex-col ${isUser ? 'items-end' : 'items-start'} w-full animate-fade-in">
+            <div class="${isUser ? 'bg-sky-600 text-white rounded-tr-sm' : 'bg-white border border-slate-200 text-slate-700 rounded-tl-sm'} px-4 py-3 rounded-2xl text-[13px] max-w-[85%] shadow-sm leading-relaxed break-words">
+                ${fmt}
+            </div>
+        </div>
+    `);
+    
+    chatBox.scrollTo({ top: chatBox.scrollHeight, behavior: 'smooth' });
+}
     </script>
 </body>
 </html>
